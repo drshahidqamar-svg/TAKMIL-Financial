@@ -3687,6 +3687,10 @@ setTimeout(()=>{
   const autoBtn=document.querySelector('.qs-btn[data-q="auto"]');
   if(autoBtn)autoBtn.classList.add('active');
 },100);
+
+/* Expose core model objects so the cloud-sync and CSV-import modules
+   (loaded as separate scripts) can read/write the live model. */
+try{ window.D=D; window.DEPT_OPTS=DEPT_OPTS; window.CUR=CUR; }catch(e){}
 </script>
 <!-- BULK ADD SCHOOLS MODAL -->
 <div id="bulk-add-modal" class="modal-bg" style="display:none" onclick="if(event.target===this)closeBulkAddModal()">
@@ -3804,5 +3808,7 @@ setTimeout(()=>{
 
 <!-- ════ TAKMIL cloud backend bridge (auth + cloud sync + roles) ════ -->
 <script src="takmil-cloud.js"></script>
+<!-- ════ TAKMIL bulk CSV import (schools / HR / supply) ════ -->
+<script src="takmil-import.js"></script>
 </body>
 </html>
