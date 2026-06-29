@@ -1048,11 +1048,14 @@ canvas{display:block}
 <!-- Top controls -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <input id="sch-search" type="text" placeholder="🔍  Search school name, village, district..." style="width:280px;font-size:12px" oninput="renderSchoolsPage()">
+    <input id="sch-search" type="text" placeholder="🔍  Search name, village, district, sponsor..." style="width:280px;font-size:12px" oninput="renderSchoolsPage()">
     <select id="sch-filter-region" style="font-size:11px;width:140px" onchange="renderSchoolsPage()">
       <option value="">All regions</option>
       <option>RC1-Ayub</option><option>RC2-Qiyanoos</option>
       <option>RC3-Shabbir</option><option>RC4-M Ali</option>
+    </select>
+    <select id="sch-filter-sponsor" style="font-size:11px;width:150px" onchange="renderSchoolsPage()">
+      <option value="">All sponsors</option>
     </select>
     <select id="sch-filter-type" style="font-size:11px;width:120px" onchange="renderSchoolsPage()">
       <option value="">All types</option>
@@ -1255,7 +1258,7 @@ canvas{display:block}
       </div>
       <div class="mf-row">
         <div><label class="mf-label">Year established</label><input id="mf-established" type="number" min="2000" max="2030" value="2022" style="width:100%"></div>
-        <div></div>
+        <div><label class="mf-label">Sponsor</label><input id="mf-sponsor" placeholder="Sponsor name" style="width:100%"></div>
       </div>
       <div style="margin-bottom:12px">
         <div class="mf-label" style="margin-bottom:8px">Quarterly status</div>
@@ -1452,7 +1455,7 @@ function serializeD() {
     changelog:D.changelog.slice(0,200),
     schoolsList:D.schoolsList.map(s=>({
       id:s.id,name:s.name,village:s.village,district:s.district,
-      region:s.region,type:s.type,students:s.students,established:s.established||2022,
+      region:s.region,type:s.type,sponsor:s.sponsor||'',students:s.students,established:s.established||2022,
       q1Status:s.q1Status||'Active',q2Status:s.q2Status||'Active',
       q3Status:s.q3Status||'Active',q4Status:s.q4Status||'Active',
       q1Reason:s.q1Reason||'',q2Reason:s.q2Reason||'',
@@ -1475,7 +1478,7 @@ function restoreD(saved) {
   if(saved.versions&&saved.versions.length) D.versions=saved.versions;
   if(saved.changelog&&saved.changelog.length) D.changelog=saved.changelog;
   if(saved.schoolsList&&saved.schoolsList.length)
-    D.schoolsList=saved.schoolsList.map(s=>Object.assign({notes:"",hasSolar:true,prevYearTech:false,teacherMon:null,infraOverrides:{}},s));
+    D.schoolsList=saved.schoolsList.map(s=>Object.assign({notes:"",sponsor:"",hasSolar:true,prevYearTech:false,teacherMon:null,infraOverrides:{}},s));
   if(saved.curMode){CUR.mode=saved.curMode;CUR.rate=saved.curRate||280;}
 }
 
@@ -2805,13 +2808,25 @@ function renderSchoolsPage() {
   const filterRegion = el('sch-filter-region')?.value || '';
   const filterType   = el('sch-filter-type')?.value || '';
   const filterStatus = el('sch-filter-status')?.value || '';
+  const filterSponsor= el('sch-filter-sponsor')?.value || '';
+
+  // Populate the sponsor dropdown from the data (preserve current selection)
+  const spSel = el('sch-filter-sponsor');
+  if (spSel) {
+    const sponsors = [...new Set(D.schoolsList.map(s => (s.sponsor||'').trim()).filter(Boolean))].sort();
+    const cur = spSel.value;
+    spSel.innerHTML = '<option value="">All sponsors</option>' +
+      sponsors.map(sp => `<option${sp===cur?' selected':''}>${sp}</option>`).join('');
+  }
 
   let filtered = D.schoolsList.filter(s => {
     if (search && !s.name.toLowerCase().includes(search) &&
         !(s.village||'').toLowerCase().includes(search) &&
-        !(s.district||'').toLowerCase().includes(search)) return false;
+        !(s.district||'').toLowerCase().includes(search) &&
+        !(s.sponsor||'').toLowerCase().includes(search)) return false;
     if (filterRegion && s.region !== filterRegion) return false;
     if (filterType && s.type !== filterType) return false;
+    if (filterSponsor && (s.sponsor||'') !== filterSponsor) return false;
     if (filterStatus) {
       const anyQ = Q_COLS.some(q => (s[q]||'Active') === filterStatus);
       if (!anyQ) return false;
@@ -2843,14 +2858,15 @@ function renderSchoolsPage() {
   if (schoolQView === 'overview') {
     thead.innerHTML = `<tr>
       <th style="width:4%">#</th>
-      <th style="width:17%">School name</th>
-      <th style="width:10%">Village</th>
-      <th style="width:10%">District</th>
-      <th style="width:12%">Region / RC</th>
-      <th style="width:7%">Type</th>
+      <th style="width:15%">School name</th>
+      <th style="width:9%">Village</th>
+      <th style="width:9%">District</th>
+      <th style="width:11%">Sponsor</th>
+      <th style="width:11%">Region / RC</th>
+      <th style="width:6%">Type</th>
       <th style="width:6%">Students</th>
-      <th style="width:7%">Q1</th><th style="width:7%">Q2</th>
-      <th style="width:7%">Q3</th><th style="width:7%">Q4</th>
+      <th style="width:6%">Q1</th><th style="width:6%">Q2</th>
+      <th style="width:6%">Q3</th><th style="width:6%">Q4</th>
       <th style="width:6%">Actions</th>
     </tr>`;
     tbody.innerHTML = filtered.slice(0, 200).map((s, idx) => {
@@ -2860,6 +2876,7 @@ function renderSchoolsPage() {
         <td style="font-weight:500;color:var(--text)">${s.name}</td>
         <td style="font-size:11px">${s.village||'—'}</td>
         <td style="font-size:11px">${s.district||'—'}</td>
+        <td><input type="text" value="${(s.sponsor||'').replace(/"/g,'&quot;')}" placeholder="—" onchange="schE(${s.id},'sponsor',this.value);renderSchoolsPage()" style="width:100%;font-size:11px"></td>
         <td><select style="font-size:10px;width:100%" onchange="schE(${s.id},'region',this.value)">
           ${['RC1-Ayub','RC2-Qiyanoos','RC3-Shabbir','RC4-M Ali'].map(r=>`<option${r===s.region?' selected':''}>${r}</option>`).join('')}
         </select></td>
@@ -3479,6 +3496,7 @@ function openSchoolModal(id){
   el('mf-type').value=s?s.type:'Community';
   el('mf-students').value=s?s.students:30;
   el('mf-established').value=s?s.established||2022:2022;
+  if(el('mf-sponsor'))el('mf-sponsor').value=s?s.sponsor||'':'';
   el('mf-q1').value=s?s.q1Status||'Active':'Active';
   el('mf-q2').value=s?s.q2Status||'Active':'Active';
   el('mf-q3').value=s?s.q3Status||'Active':'Active';
@@ -3507,6 +3525,7 @@ function saveSchoolModal(){
     name,village:el('mf-village').value,district:el('mf-district').value,
     region:el('mf-region').value,type:el('mf-type').value,
     students:+el('mf-students').value||0,established:+el('mf-established').value||2022,
+    sponsor:(el('mf-sponsor')?.value||'').trim(),
     q1Status:el('mf-q1').value,q2Status:el('mf-q2').value,
     q3Status:el('mf-q3').value,q4Status:el('mf-q4').value,
     q1Reason:el('mf-q1-reason').value,q2Reason:el('mf-q2-reason').value,

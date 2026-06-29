@@ -92,15 +92,16 @@
     schools: {
       label: 'Schools',
       arr: () => D().schoolsList,
-      headers: ['name', 'village', 'district', 'region', 'type', 'students', 'established',
+      headers: ['name', 'village', 'district', 'region', 'sponsor', 'type', 'students', 'established',
         'q1Status', 'q2Status', 'q3Status', 'q4Status', 'notes', 'hasSolar', 'prevYearTech'],
       hints: {
-        students: 'number', established: 'year e.g. 2022',
+        students: 'number', established: 'year e.g. 2022', sponsor: 'sponsor name (text)',
         q1Status: SCHOOL_STATUS.join(' / '), hasSolar: 'true/false', prevYearTech: 'true/false',
       },
       // turn a model object into a flat CSV row
       toRow: s => ({
-        name: s.name, village: s.village, district: s.district, region: s.region, type: s.type,
+        name: s.name, village: s.village, district: s.district, region: s.region,
+        sponsor: s.sponsor || '', type: s.type,
         students: s.students, established: s.established || 2022,
         q1Status: s.q1Status || 'Active', q2Status: s.q2Status || 'Active',
         q3Status: s.q3Status || 'Active', q4Status: s.q4Status || 'Active',
@@ -119,7 +120,7 @@
         const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : 'Active';
         const rec = {
           name: o.name, village: o.village || '', district: o.district || '',
-          region: o.region || '', type: o.type || 'Community',
+          region: o.region || '', type: o.type || 'Community', sponsor: o.sponsor || '',
           students: isNaN(st) ? 25 : st, established: o.established ? num(o.established, 2022) : 2022,
           q1Status: cap(o.q1Status) || 'Active', q2Status: cap(o.q2Status) || 'Active',
           q3Status: cap(o.q3Status) || 'Active', q4Status: cap(o.q4Status) || 'Active',
@@ -133,7 +134,7 @@
         };
         return { rec, errs };
       },
-      summary: r => `${r.name} · ${r.district || '—'} · ${r.students} students`,
+      summary: r => `${r.name} · ${r.district || '—'}${r.sponsor ? ' · ' + r.sponsor : ''} · ${r.students} students`,
     },
 
     hr: {
