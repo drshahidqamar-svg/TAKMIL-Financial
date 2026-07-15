@@ -1260,6 +1260,10 @@ canvas{display:block}
         <div><label class="mf-label">Year established</label><input id="mf-established" type="number" min="2000" max="2030" value="2022" style="width:100%"></div>
         <div><label class="mf-label">Sponsor</label><input id="mf-sponsor" placeholder="Sponsor name" style="width:100%"></div>
       </div>
+      <div class="mf-row">
+        <div><label class="mf-label">School Coordinator</label><input id="mf-schoolCoordinator" placeholder="Coordinator name" style="width:100%"></div>
+        <div><label class="mf-label">Regional Coordinator</label><input id="mf-regionalCoordinator" placeholder="Regional coordinator name" style="width:100%"></div>
+      </div>
       <div style="margin-bottom:12px">
         <div class="mf-label" style="margin-bottom:8px">Quarterly status</div>
         <div class="q-status-grid">
@@ -1462,6 +1466,8 @@ function serializeD() {
       q3Reason:s.q3Reason||'',q4Reason:s.q4Reason||'',notes:s.notes||'',
       hasSolar:s.hasSolar!==false, prevYearTech:!!s.prevYearTech,
       teacherMon:s.teacherMon||null,
+      schoolCoordinator:s.schoolCoordinator||'',regionalCoordinator:s.regionalCoordinator||'',
+      items:Object.assign({},s.items||{}),
       infraOverrides:Object.assign({},s.infraOverrides||{})
     })),
     curMode:CUR.mode, curRate:CUR.rate,
@@ -1478,7 +1484,7 @@ function restoreD(saved) {
   if(saved.versions&&saved.versions.length) D.versions=saved.versions;
   if(saved.changelog&&saved.changelog.length) D.changelog=saved.changelog;
   if(saved.schoolsList&&saved.schoolsList.length)
-    D.schoolsList=saved.schoolsList.map(s=>Object.assign({notes:"",sponsor:"",hasSolar:true,prevYearTech:false,teacherMon:null,infraOverrides:{}},s));
+    D.schoolsList=saved.schoolsList.map(s=>Object.assign({notes:"",sponsor:"",schoolCoordinator:"",regionalCoordinator:"",items:{},hasSolar:true,prevYearTech:false,teacherMon:null,infraOverrides:{}},s));
   if(saved.curMode){CUR.mode=saved.curMode;CUR.rate=saved.curRate||280;}
 }
 
@@ -3497,6 +3503,8 @@ function openSchoolModal(id){
   el('mf-students').value=s?s.students:30;
   el('mf-established').value=s?s.established||2022:2022;
   if(el('mf-sponsor'))el('mf-sponsor').value=s?s.sponsor||'':'';
+  if(el('mf-schoolCoordinator'))el('mf-schoolCoordinator').value=s?s.schoolCoordinator||'':'';
+  if(el('mf-regionalCoordinator'))el('mf-regionalCoordinator').value=s?s.regionalCoordinator||'':'';
   el('mf-q1').value=s?s.q1Status||'Active':'Active';
   el('mf-q2').value=s?s.q2Status||'Active':'Active';
   el('mf-q3').value=s?s.q3Status||'Active':'Active';
@@ -3526,6 +3534,8 @@ function saveSchoolModal(){
     region:el('mf-region').value,type:el('mf-type').value,
     students:+el('mf-students').value||0,established:+el('mf-established').value||2022,
     sponsor:(el('mf-sponsor')?.value||'').trim(),
+    schoolCoordinator:(el('mf-schoolCoordinator')?.value||'').trim(),
+    regionalCoordinator:(el('mf-regionalCoordinator')?.value||'').trim(),
     q1Status:el('mf-q1').value,q2Status:el('mf-q2').value,
     q3Status:el('mf-q3').value,q4Status:el('mf-q4').value,
     q1Reason:el('mf-q1-reason').value,q2Reason:el('mf-q2-reason').value,
@@ -3831,5 +3841,7 @@ try{ window.D=D; window.DEPT_OPTS=DEPT_OPTS; window.CUR=CUR; }catch(e){}
 <script src="takmil-import.js"></script>
 <!-- ════ TAKMIL cost-per-child simulation page ════ -->
 <script src="takmil-sim.js"></script>
+<!-- ════ TAKMIL per-school items & costs ════ -->
+<script src="takmil-schoolitems.js"></script>
 </body>
 </html>

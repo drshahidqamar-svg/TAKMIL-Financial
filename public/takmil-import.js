@@ -93,20 +93,40 @@
       label: 'Schools',
       arr: () => D().schoolsList,
       headers: ['name', 'village', 'district', 'region', 'sponsor', 'type', 'students', 'established',
-        'q1Status', 'q2Status', 'q3Status', 'q4Status', 'notes', 'hasSolar', 'prevYearTech'],
+        'q1Status', 'q2Status', 'q3Status', 'q4Status', 'notes', 'hasSolar', 'prevYearTech',
+        'schoolCoordinator', 'regionalCoordinator', 'teacherMonthlySalary',
+        'Chromebooks', 'Laptops', 'USB Drives', 'Learning Mats', 'Lesson Planners',
+        'Books', 'School Bags', 'Stationery Kits', 'Assessment Photocopies',
+        'Projectors', 'Whiteboards', 'School Banners', 'Internet Allowance'],
       hints: {
-        students: 'number', established: 'year e.g. 2022', sponsor: 'sponsor name (text)',
+        students: 'number', established: 'year e.g. 2022', sponsor: 'sponsor name (or use "Funded By")',
         q1Status: SCHOOL_STATUS.join(' / '), hasSolar: 'true/false', prevYearTech: 'true/false',
+        schoolCoordinator: 'person name (text)', regionalCoordinator: 'person name (text)',
+        teacherMonthlySalary: 'USD/mo, blank = global rate',
+        Chromebooks: 'quantity', Projectors: 'true/false (yes-no item)',
+        Whiteboards: 'true/false', 'School Banners': 'true/false', 'Internet Allowance': 'true/false',
       },
       // turn a model object into a flat CSV row
-      toRow: s => ({
-        name: s.name, village: s.village, district: s.district, region: s.region,
-        sponsor: s.sponsor || '', type: s.type,
-        students: s.students, established: s.established || 2022,
-        q1Status: s.q1Status || 'Active', q2Status: s.q2Status || 'Active',
-        q3Status: s.q3Status || 'Active', q4Status: s.q4Status || 'Active',
-        notes: s.notes || '', hasSolar: s.hasSolar !== false, prevYearTech: !!s.prevYearTech,
-      }),
+      toRow: s => {
+        const it = s.items || {};
+        return {
+          name: s.name, village: s.village, district: s.district, region: s.region,
+          sponsor: s.sponsor || '', type: s.type,
+          students: s.students, established: s.established || 2022,
+          q1Status: s.q1Status || 'Active', q2Status: s.q2Status || 'Active',
+          q3Status: s.q3Status || 'Active', q4Status: s.q4Status || 'Active',
+          notes: s.notes || '', hasSolar: s.hasSolar !== false, prevYearTech: !!s.prevYearTech,
+          schoolCoordinator: s.schoolCoordinator || '', regionalCoordinator: s.regionalCoordinator || '',
+          teacherMonthlySalary: s.teacherMon == null ? '' : s.teacherMon,
+          Chromebooks: it['Chromebooks'] || 0, Laptops: it['Laptops'] || 0,
+          'USB Drives': it['USB Drives'] || 0, 'Learning Mats': it['Learning Mats'] || 0,
+          'Lesson Planners': it['Lesson Planners'] || 0, Books: it['Books'] || 0,
+          'School Bags': it['School Bags'] || 0, 'Stationery Kits': it['Stationery Kits'] || 0,
+          'Assessment Photocopies': it['Assessment Photocopies'] || 0,
+          Projectors: !!it['Projectors'], Whiteboards: !!it['Whiteboards'],
+          'School Banners': !!it['School Banners'], 'Internet Allowance': !!it['Internet Allowance'],
+        };
+      },
       // turn a CSV object into a validated model record (+ errors)
       parse: (o, idx) => {
         const errs = [];
@@ -118,9 +138,22 @@
             errs.push(`${q} "${o[q]}" not one of ${SCHOOL_STATUS.join('/')}`);
         });
         const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : 'Active';
+        // "Funded By" is an alias for sponsor — accept either column
+        const sponsor = (o.sponsor || o['Funded By'] || o['funded by'] || '').trim();
+        // per-school item quantities / flags
+        const QTY_ITEMS = ['Chromebooks', 'Laptops', 'USB Drives', 'Learning Mats',
+          'Lesson Planners', 'Books', 'School Bags', 'Stationery Kits', 'Assessment Photocopies'];
+        const YESNO_ITEMS = ['Projectors', 'Whiteboards', 'School Banners', 'Internet Allowance'];
+        const items = {};
+        QTY_ITEMS.forEach(k => { const n = num(o[k], 0); if (n) items[k] = n; });
+        YESNO_ITEMS.forEach(k => { if (bool(o[k])) items[k] = true; });
+        const tms = (o.teacherMonthlySalary === '' || o.teacherMonthlySalary == null)
+          ? null : num(o.teacherMonthlySalary, null);
         const rec = {
           name: o.name, village: o.village || '', district: o.district || '',
-          region: o.region || '', type: o.type || 'Community', sponsor: o.sponsor || '',
+          region: o.region || '', type: o.type || 'Community', sponsor: sponsor,
+          schoolCoordinator: (o.schoolCoordinator || o['School Coordinator'] || '').trim(),
+          regionalCoordinator: (o.regionalCoordinator || o['Regional Coordinator'] || '').trim(),
           students: isNaN(st) ? 25 : st, established: o.established ? num(o.established, 2022) : 2022,
           q1Status: cap(o.q1Status) || 'Active', q2Status: cap(o.q2Status) || 'Active',
           q3Status: cap(o.q3Status) || 'Active', q4Status: cap(o.q4Status) || 'Active',
@@ -130,7 +163,8 @@
           notes: o.notes || '',
           hasSolar: o.hasSolar === '' ? true : bool(o.hasSolar),
           prevYearTech: bool(o.prevYearTech),
-          infraOverrides: {}, teacherMon: null, fcoordMon: null,
+          items: items, teacherMon: tms,
+          infraOverrides: {}, fcoordMon: null,
         };
         return { rec, errs };
       },
