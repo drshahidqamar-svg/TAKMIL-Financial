@@ -3720,6 +3720,10 @@ setTimeout(()=>{
 /* Expose core model objects so the cloud-sync and CSV-import modules
    (loaded as separate scripts) can read/write the live model. */
 try{ window.D=D; window.DEPT_OPTS=DEPT_OPTS; window.CUR=CUR; }catch(e){}
+/* Expose cost/model functions for the projection & simulation modules. */
+try{ window.totCost=totCost; window.cpc=cpc; window.fieldAnn=fieldAnn; window.hqAnn=hqAnn;
+     window.supTotal=supTotal; window.supAll=supAll; window.overhead=overhead;
+     window.activeSchoolCount=activeSchoolCount; window.activeStudentCount=activeStudentCount; }catch(e){}
 </script>
 <!-- BULK ADD SCHOOLS MODAL -->
 <div id="bulk-add-modal" class="modal-bg" style="display:none" onclick="if(event.target===this)closeBulkAddModal()">
@@ -3843,5 +3847,7 @@ try{ window.D=D; window.DEPT_OPTS=DEPT_OPTS; window.CUR=CUR; }catch(e){}
 <script src="takmil-sim.js"></script>
 <!-- ════ TAKMIL per-school items & costs ════ -->
 <script src="takmil-schoolitems.js"></script>
+<!-- ════ TAKMIL projection (what-if cost per child) ════ -->
+<script src="takmil-projection.js"></script>
 </body>
 </html>
