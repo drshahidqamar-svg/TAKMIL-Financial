@@ -85,6 +85,21 @@
   const bool = v => /^(1|true|yes|y)$/i.test(String(v).trim());
   const D = () => window.D;
 
+  // ── currency handling ─────────────────────────────────────────
+  // The model stores ALL money in USD. If the uploaded file's money
+  // columns are in PKR, convert them to USD on the way in using the
+  // app's exchange rate, so every downstream calculation stays correct.
+  let IMPORT_CUR = 'usd';            // 'usd' | 'pkr' — chosen per import
+  function rate() {
+    try { return (window.CUR && window.CUR.rate) ? window.CUR.rate : 280; } catch (e) { return 280; }
+  }
+  // money(): parse a money cell and normalise it to USD
+  function money(v, d = 0) {
+    const n = num(v, NaN);
+    if (isNaN(n)) return d;
+    return IMPORT_CUR === 'pkr' ? n / rate() : n;
+  }
+
   // ────────────────────────────────────────────────────────────
   // SCHEMAS — one per data type
   // ────────────────────────────────────────────────────────────
@@ -148,7 +163,7 @@
         QTY_ITEMS.forEach(k => { const n = num(o[k], 0); if (n) items[k] = n; });
         YESNO_ITEMS.forEach(k => { if (bool(o[k])) items[k] = true; });
         const tms = (o.teacherMonthlySalary === '' || o.teacherMonthlySalary == null)
-          ? null : num(o.teacherMonthlySalary, null);
+          ? null : money(o.teacherMonthlySalary, null);
         const rec = {
           name: o.name, village: o.village || '', district: o.district || '',
           region: o.region || '', type: o.type || 'Community', sponsor: sponsor,
@@ -188,7 +203,7 @@
       parse: (o) => {
         const errs = [];
         if (!o.name) errs.push('name is required');
-        const mon = num(o.monthlySalary, NaN);
+        const mon = money(o.monthlySalary, NaN);
         if (isNaN(mon)) errs.push('monthlySalary must be a number');
         const sQ = o.startQuarter ? num(o.startQuarter, 1) : 1;
         if (sQ < 1 || sQ > 4) errs.push('startQuarter must be 1-4');
@@ -201,7 +216,7 @@
         };
         return { rec, errs };
       },
-      summary: r => `${r.n} · ${r.r || '—'} · ${r.d} · $${r.mon}/mo${r.isFC ? ' [FC]' : ''}${r.isRC ? ' [RC]' : ''}`,
+      summary: r => `${r.n} · ${r.r || '—'} · ${r.d} · $${Math.round(r.mon)}/mo${IMPORT_CUR === 'pkr' ? ' (Rs.' + Math.round(r.mon * rate()).toLocaleString() + ')' : ''}${r.isFC ? ' [FC]' : ''}${r.isRC ? ' [RC]' : ''}`,
     },
 
     supply: {
@@ -220,7 +235,7 @@
       parse: (o) => {
         const errs = [];
         if (!o.name) errs.push('name is required');
-        const up = num(o.unitPrice, NaN);
+        const up = money(o.unitPrice, NaN);
         if (isNaN(up)) errs.push('unitPrice must be a number');
         if (o.category && !SUPPLY_CAT.includes(o.category.toLowerCase()))
           errs.push(`category must be ${SUPPLY_CAT.join('/')}`);
@@ -234,7 +249,7 @@
         };
         return { rec, errs };
       },
-      summary: r => `${r.n} · $${r.up} · ${r.cat} · per "${r.formula}"`,
+      summary: r => `${r.n} · $${Math.round(r.up)}${IMPORT_CUR === 'pkr' ? ' (Rs.' + Math.round(r.up * rate()).toLocaleString() + ')' : ''} · ${r.cat} · per "${r.formula}"`,
     },
   };
 
@@ -298,6 +313,12 @@
       document.getElementById('tk-imp-body').innerHTML = `
         <p class="tk-imp-intro">Currently <b>${count}</b> ${sc.label.toLowerCase()} in the model.
         Download the template, fill it in Excel / Google Sheets, then upload it back.</p>
+        <div class="tk-cur-box">
+          <span class="tk-cur-lab">Money columns in this file are in:</span>
+          <label class="tk-cur-opt"><input type="radio" name="tk-cur" value="usd" checked> USD ($)</label>
+          <label class="tk-cur-opt"><input type="radio" name="tk-cur" value="pkr"> Rupees (Rs.)</label>
+          <span class="tk-cur-note" id="tk-cur-note"></span>
+        </div>
         <div class="tk-imp-actions">
           <button class="tk-mini2" data-dl="empty"><i class="ti ti-download"></i> Empty template</button>
           <button class="tk-mini2" data-dl="current"><i class="ti ti-download"></i> Template with current data</button>
@@ -312,9 +333,34 @@
         </label>
         <div id="tk-preview"></div>`;
       const body = document.getElementById('tk-imp-body');
+
+      // currency selector — controls how money columns are read
+      function updCurNote() {
+        const n = document.getElementById('tk-cur-note');
+        if (!n) return;
+        n.textContent = IMPORT_CUR === 'pkr'
+          ? `converted to USD at 1 USD = Rs. ${rate().toLocaleString()}`
+          : 'stored as-is';
+      }
+      body.querySelectorAll('input[name="tk-cur"]').forEach(r => {
+        r.onchange = () => { IMPORT_CUR = r.value; updCurNote(); };
+      });
+      IMPORT_CUR = 'usd';
+      updCurNote();
+
       body.querySelector('[data-dl="empty"]').onclick = () => download(`takmil_${type}_template.csv`, toCSV(sc.headers, []));
-      body.querySelector('[data-dl="current"]').onclick = () =>
-        download(`takmil_${type}_current.csv`, toCSV(sc.headers, sc.arr().map(sc.toRow)));
+      body.querySelector('[data-dl="current"]').onclick = () => {
+        // If exporting in PKR, convert stored USD money fields to rupees so
+        // the file round-trips correctly when re-imported as PKR.
+        const MONEY_COLS = { hr: ['monthlySalary'], supply: ['unitPrice'], schools: ['teacherMonthlySalary'] }[type] || [];
+        const rows = sc.arr().map(sc.toRow).map(r => {
+          if (IMPORT_CUR !== 'pkr') return r;
+          const c = Object.assign({}, r);
+          MONEY_COLS.forEach(k => { if (c[k] !== '' && c[k] != null && !isNaN(+c[k])) c[k] = Math.round(+c[k] * rate()); });
+          return c;
+        });
+        download(`takmil_${type}_current${IMPORT_CUR === 'pkr' ? '_PKR' : ''}.csv`, toCSV(sc.headers, rows));
+      };
       body.querySelector('#tk-file').onchange = e => {
         const f = e.target.files[0]; if (!f) return;
         const rdr = new FileReader();
@@ -408,6 +454,10 @@
     .tk-imp-tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text3,#94a3b8);padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:-1px}
     .tk-imp-tab.active{color:#10b981;border-bottom-color:#10b981}
     .tk-imp-actions{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .tk-cur-box{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--bg3,#1a2236);border:.5px solid var(--border2,rgba(255,255,255,.12));border-radius:8px;padding:9px 12px;margin-bottom:12px}
+    .tk-cur-lab{font-size:12px;color:var(--text2,#e2e8f0);font-weight:600}
+    .tk-cur-opt{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2,#e2e8f0);cursor:pointer}
+    .tk-cur-note{font-size:11px;color:#10b981;margin-left:auto}
     .tk-mini2{display:flex;align-items:center;gap:6px;background:var(--bg3,#1a2236);border:.5px solid var(--border2,rgba(255,255,255,.12));color:var(--text2,#e2e8f0);border-radius:7px;padding:7px 12px;font-size:11px;cursor:pointer}
     .tk-mini2:hover{border-color:#10b981;color:#10b981}
     .tk-cols{margin:6px 0 14px;font-size:11px;color:var(--text3,#94a3b8)}
