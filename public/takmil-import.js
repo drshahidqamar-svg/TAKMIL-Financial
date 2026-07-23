@@ -110,16 +110,19 @@
       headers: ['name', 'village', 'district', 'region', 'sponsor', 'type', 'students', 'established',
         'q1Status', 'q2Status', 'q3Status', 'q4Status', 'notes', 'hasSolar', 'prevYearTech',
         'schoolCoordinator', 'regionalCoordinator', 'teacherMonthlySalary',
-        'Projectors', 'Whiteboards', 'School Banners', 'Internet Allowance'],
+        'Books', 'Chromebooks', 'Solar Panels', 'Laptops', 'USB Drives',
+        'Learning Mats', 'Lesson Planners', 'Projectors', 'Whiteboards',
+        'School Banners', 'Internet Allowance', 'School Bags', 'Stationery Kits',
+        'Assessment Photocopies'],
       hints: {
         students: 'number', established: 'year e.g. 2022', sponsor: 'sponsor name (or use "Funded By")',
         q1Status: SCHOOL_STATUS.join(' / '), hasSolar: 'true/false', prevYearTech: 'true/false',
         schoolCoordinator: 'person name (text)', regionalCoordinator: 'person name (text)',
         teacherMonthlySalary: 'per-school override, blank = global rate',
-        Projectors: 'quarters: Q1 / Q1,Q3 / all / blank',
-        Whiteboards: 'quarters: Q1 / Q1,Q3 / all / blank',
-        'School Banners': 'quarters: Q1 / Q1,Q3 / all / blank',
-        'Internet Allowance': 'quarters: Q1 / Q1,Q3 / all / blank',
+        Books: 'delivery quarters: Q1 / Q1,Q3 / all / blank',
+        Chromebooks: 'delivery quarters', 'Solar Panels': 'delivery quarters',
+        Laptops: 'delivery quarters', 'USB Drives': 'delivery quarters',
+        Projectors: 'delivery quarters', 'Internet Allowance': 'delivery quarters (recurring)',
       },
       // turn a model object into a flat CSV row
       toRow: s => {
@@ -140,8 +143,14 @@
           notes: s.notes || '', hasSolar: s.hasSolar !== false, prevYearTech: !!s.prevYearTech,
           schoolCoordinator: s.schoolCoordinator || '', regionalCoordinator: s.regionalCoordinator || '',
           teacherMonthlySalary: s.teacherMon == null ? '' : s.teacherMon,
-          Projectors: qStr('Projectors'), Whiteboards: qStr('Whiteboards'),
-          'School Banners': qStr('School Banners'), 'Internet Allowance': qStr('Internet Allowance'),
+          Books: qStr('Books'), Chromebooks: qStr('Chromebooks'),
+          'Solar Panels': qStr('Solar Panels'), Laptops: qStr('Laptops'),
+          'USB Drives': qStr('USB Drives'), 'Learning Mats': qStr('Learning Mats'),
+          'Lesson Planners': qStr('Lesson Planners'), Projectors: qStr('Projectors'),
+          Whiteboards: qStr('Whiteboards'), 'School Banners': qStr('School Banners'),
+          'Internet Allowance': qStr('Internet Allowance'), 'School Bags': qStr('School Bags'),
+          'Stationery Kits': qStr('Stationery Kits'),
+          'Assessment Photocopies': qStr('Assessment Photocopies'),
         };
       },
       // turn a CSV object into a validated model record (+ errors)
@@ -157,7 +166,9 @@
         const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : 'Active';
         const sponsor = (o.sponsor || o['Funded By'] || o['funded by'] || '').trim();
         // yes/no items: parse quarter spec — "Q1", "Q1,Q3", "all", "true", blank
-        const YESNO_ITEMS = ['Projectors', 'Whiteboards', 'School Banners', 'Internet Allowance'];
+        const ALL_ITEMS = ['Books', 'Chromebooks', 'Solar Panels', 'Laptops', 'USB Drives',
+          'Learning Mats', 'Lesson Planners', 'Projectors', 'Whiteboards', 'School Banners',
+          'Internet Allowance', 'School Bags', 'Stationery Kits', 'Assessment Photocopies'];
         const parseQuarters = v => {
           const s = String(v == null ? '' : v).trim().toLowerCase();
           if (!s) return [false, false, false, false];
@@ -171,7 +182,7 @@
           return f;
         };
         const itemQ = {};
-        YESNO_ITEMS.forEach(k => { itemQ[k] = parseQuarters(o[k]); });
+        ALL_ITEMS.forEach(k => { itemQ[k] = parseQuarters(o[k]); });
         const tms = (o.teacherMonthlySalary === '' || o.teacherMonthlySalary == null)
           ? null : money(o.teacherMonthlySalary, null);
         const rec = {
