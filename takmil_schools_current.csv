@@ -1,0 +1,158 @@
+name,village,district,region,sponsor,type,students,established,q1Status,q2Status,q3Status,q4Status,notes,hasSolar,prevYearTech,schoolCoordinator,regionalCoordinator,teacherMonthlySalary,Chromebooks,Laptops,USB Drives,Learning Mats,Lesson Planners,Books,School Bags,Stationery Kits,Assessment Photocopies,Projectors,Whiteboards,School Banners,Internet Allowance
+JamalChannar_O_W24P,JamalChannar,Bahawalpur,Punjab,USA,Community,27,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13.5,27,27,27,TRUE,TRUE,TRUE,TRUE
+KasraMirzai_A_W25B,Kasra Mirzai,killa Saif Ullah,Balochistan,Canada,Community,25,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+BabuChanna_O_W26S,Babu Channa,Dadu,Sindh,USA,Community,30,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15,30,30,30,FALSE,TRUE,TRUE,TRUE
+Khanewal_O_W24P,Khanewal,Khanewal,Punjab,USA,Community,3,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,1.5,3,3,3,TRUE,TRUE,TRUE,TRUE
+Darel_O_W26GB,Darel,Diamer,GilgitBaltistan,USA,Community,45,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22.5,45,45,45,FALSE,TRUE,TRUE,TRUE
+BeenzghaliTirraAkakhel_A_W24KPK,Beenzghali Tirra Akakhel,KhyberAgency,KPK,USA,Community,13,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6.5,13,13,13,TRUE,TRUE,TRUE,TRUE
+Batozai_B_W26B,Batozai,Killa Saif Ullah,Balochistan,USA,Community,43,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,21.5,43,43,43,FALSE,TRUE,TRUE,TRUE
+Hafizabad_O_W26P,Hafizabad,Muzafargarh,Punjab,USA,Community,36,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,18,36,36,36,FALSE,TRUE,TRUE,TRUE
+BastiDuniapur_O_W24P,BastiDuniapur,Rajanpur,Punjab,USA,Community,31,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,TRUE,TRUE,TRUE,TRUE
+Khairava_A_W25B,Khairava,Khuzdar,Balochistan,Canada,Community,23,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+TooraKhula_O_W26B,Toora Khula,Zhob,Balochistan,USA,Community,42,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,21,42,42,42,FALSE,TRUE,TRUE,TRUE
+AliHassanHingrjo_O_W24S,AliHassanHingrjo,Sanghar,Sindh,USA,Community,10,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,5,10,10,10,TRUE,TRUE,TRUE,TRUE
+Baghao_O_W24B,Baghao,Barkhan,Balochistan,USA,Community,21,2020,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,10.5,21,21,21,TRUE,TRUE,TRUE,TRUE
+Garbong_O_W24GB,Garbong,Diamer,GilgitBaltistan,USA,Community,23,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+Kolpur_B_W26B,Kolpur,Kolpur,Balochistan,USA,Community,22,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,FALSE,TRUE,TRUE,TRUE
+HariSingh_O_W26P,Hari Singh,Faisalabad,Punjab,USA,Community,33,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16.5,33,33,33,FALSE,TRUE,TRUE,TRUE
+Soonkhura_O_W24P,Soonkhura,Khushab,Punjab,USA,Community,10,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,5,10,10,10,TRUE,TRUE,TRUE,TRUE
+FatimaColony_O_W26F,Fatima Colony,Islamabad,Federal,USA,Community,35,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17.5,35,35,35,FALSE,TRUE,TRUE,TRUE
+MuhammadJannahKallyKhawarKhasrogi_B_W24KPK,MuhammadJannahKallyKhawarKhasrogi,KhyberAgency,KPK,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+AkhonColony_A_W24GB,AkhonColony,Skardu,GilgitBaltistan,USA,Community,24,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12,24,24,24,TRUE,TRUE,TRUE,TRUE
+Batozai_C_W26B,Batozai,Killa Saif Ullah,Balochistan,USA,Community,12,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6,12,12,12,FALSE,TRUE,TRUE,TRUE
+ToheedAbad_O_W25P,Toheedabad,Muzafargarh,Punjab,USA,Community,29,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,14.5,29,29,29,TRUE,TRUE,TRUE,TRUE
+KilliSharifabad_A_W26B,Killi Sharifabad,Killa Saif Ullah,Balochistan,USA,Community,28,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,14,28,28,28,FALSE,TRUE,TRUE,TRUE
+Zagadherai_O_W24KPK,Zagadherai,BajaurAgency,KPK,Canada,Community,31,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,TRUE,TRUE,TRUE,TRUE
+LundaPhatak_O_W24P,LundaPhatak,RahimyarKhan,Punjab,Canada,Community,29,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,14.5,29,29,29,TRUE,TRUE,TRUE,TRUE
+BastiBhuttaLashari_O_W24P,BastiBhuttaLashari,Rajanpur,Punjab,USA,Community,20,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,10,20,20,20,TRUE,TRUE,TRUE,TRUE
+BastiDaim_O_W25P,Basti Daim,Bahawalpur,Punjab,Canada,Community,13,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6.5,13,13,13,TRUE,TRUE,TRUE,TRUE
+Shakas_O_W26KPK,Shakas,Bara,KPK,USA,Community,30,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15,30,30,30,FALSE,TRUE,TRUE,TRUE
+Topi_O_W26KPK,Topi,Sawabi,KPK,USA,Community,31,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,FALSE,TRUE,TRUE,TRUE
+LuckyMarwat_O_W26KPK,Lucky Marwat,Lucky Marwat,KPK,USA,Community,25,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,FALSE,TRUE,TRUE,TRUE
+BastiNoorMuhammadMusani_O_SP23P,BastiNoorMuhammadMusani,RahimyarKhan,Punjab,USA,Community,27,2023,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13.5,27,27,27,TRUE,TRUE,TRUE,TRUE
+BastiBhutta_O_W24P,BastiBhutta,Rajanpur,Punjab,Canada,Community,24,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12,24,24,24,TRUE,TRUE,TRUE,TRUE
+KhanBaiKhelomela_B_W24KPK,KhanBaiKhelomela,KhyberAgency,KPK,USA,Community,27,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13.5,27,27,27,TRUE,TRUE,TRUE,TRUE
+JhokAbdulSuleman_O_W26P,Jhok Abdul Suleman,Bahawalpur,Punjab,USA,Community,38,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,19,38,38,38,FALSE,TRUE,TRUE,TRUE
+Chak#112DNB_O_W24P,Chak#112DNB,Bahawalpur,Punjab,USA,Community,26,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13,26,26,26,TRUE,TRUE,TRUE,TRUE
+Murghai_O_W26P,Murghai,Rajanpur,Punjab,USA,Community,30,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15,30,30,30,FALSE,TRUE,TRUE,TRUE
+KasraMirzai_B_W25B,Kasra Mirzai,killa Saif Ullah,Balochistan,Canada,Community,25,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+Darel_B_F22GB,Manikal,Diamer,GilgitBaltistan,Canada,Community,25,2022,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+KiliQasumkhadkucha_O_W26B,KiliQasumkhadkucha,Mastung,Balochistan,USA,Community,45,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22.5,45,45,45,FALSE,TRUE,TRUE,TRUE
+ModelTownManawala_A_W24P,ModelTownManawala,Sheikhupura,Punjab,Canada,Community,24,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12,24,24,24,TRUE,TRUE,TRUE,TRUE
+Chak#71DB_B_W24P,Chak#71DB,Bahawalpur,Punjab,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+HajiPirBakshRajhir_A_W24S,HajiPirBakshRajhir,Sanghar,Sindh,USA,Community,15,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,7.5,15,15,15,TRUE,TRUE,TRUE,TRUE
+BastiKaramShah_B_W24P,BastiKaramShah,Rajanpur,Punjab,USA,Community,32,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16,32,32,32,TRUE,TRUE,TRUE,TRUE
+Qalat_A_W25KPK,Qalat,Kurrum,KPK,Canada,Community,22,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,TRUE,TRUE,TRUE,TRUE
+HayatLar_O_W26P,Hayat Lar,Rahim Yar Khan,Punjab,USA,Community,31,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,FALSE,TRUE,TRUE,TRUE
+BastiBandAli_O_W26P,Basti Band Ali,Rajan Pur,Punjab,USA,Community,34,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17,34,34,34,FALSE,TRUE,TRUE,TRUE
+AbdulRehmanMallah_O_SP23S,AbdulRehmanMallah,Jamshoro,Sindh,USA,Community,25,2023,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+BastiSadiqabad_O_W26P,Basti Sadiqabad,Bahawalpur,Punjab,USA,Community,27,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13.5,27,27,27,FALSE,TRUE,TRUE,TRUE
+MohammedAbbasSolangi_A_W24S,MohammedAbbasSolangi,Sanghar,Sindh,USA,Community,15,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,7.5,15,15,15,TRUE,TRUE,TRUE,TRUE
+Tanimomund_O_W24KPK,Tanimomund,BajaurAgency,KPK,USA,Community,21,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,10.5,21,21,21,TRUE,TRUE,TRUE,TRUE
+Pushtakhararingroad_O_W26KPK,Pushtakhararingroad,Peshawar,KPK,USA,Community,22,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,FALSE,TRUE,TRUE,TRUE
+MahanjiWala_O_W24P,MahanjiWala,Bahawalpur,Punjab,USA,Community,33,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16.5,33,33,33,TRUE,TRUE,TRUE,TRUE
+ThalayChundu_O_W26GB,Thalay Chundu,Ganchi,GilgitBaltistan,USA,Community,35,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17.5,35,35,35,FALSE,TRUE,TRUE,TRUE
+BastiGohtShahMuhammad_O_W24P,BastiGohtShahMuhammad,Bahawalpur,Punjab,USA,Community,23,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+BastiMatla_O_W24P,BastiMatla,Bahawalpur,Punjab,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+MuhammadJannahKallyKhawarKhasrogi_A_W24KPK,MuhammadJannahKallyKhawarKhasrogi,KhyberAgency,KPK,USA,Community,23,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+HayatShah_O_W24S,Hayat Shah,Mirpur Khas,Sindh,USA,Community,11,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,5.5,11,11,11,TRUE,TRUE,TRUE,TRUE
+Puchguch_C_F22GB,Puchguch,Diamer,GilgitBaltistan,USA,Community,16,2022,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,8,16,16,16,TRUE,TRUE,TRUE,TRUE
+KamarKhelBazgara_O_W24KPK,KamarKhelBazgara,KhyberAgency,KPK,USA,Community,41,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,20.5,41,41,41,TRUE,TRUE,TRUE,TRUE
+Sugomila_B_W25KPK,Sugomila,Kurrum,KPK,USA,Community,26,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13,26,26,26,TRUE,TRUE,TRUE,TRUE
+Gawaki_O_W26KPK,Gawaki,Kurrum,KPK,USA,Community,33,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16.5,33,33,33,FALSE,TRUE,TRUE,TRUE
+BastiTaheemAbad_O_W24P,BastiTaheemAbad,Bahawalpur,Punjab,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+KhokranWala_O_W24P,KhokranWala,Jhang,Punjab,USA,Community,19,2021,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,9.5,19,19,19,TRUE,TRUE,TRUE,TRUE
+RoshanBhait_O_W26P,Roshan Bhait,Bahawalpur,Punjab,USA,Community,30,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15,30,30,30,FALSE,TRUE,TRUE,TRUE
+MeharShah_O_W26P,Khanewal,Khanewal,Punjab,USA,Community,31,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,FALSE,TRUE,TRUE,TRUE
+Chak#71DB_A_W24P,Chak#71DB,Bahawalpur,Punjab,USA,Community,27,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13.5,27,27,27,TRUE,TRUE,TRUE,TRUE
+KilliFarooqabad_B_W24B,KilliFarooqabad,Mastung,Balochistan,USA,Community,36,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,18,36,36,36,TRUE,TRUE,TRUE,TRUE
+BastiTambli_O_W24B,BastiTambli,Kohlu,Balochistan,USA,Community,24,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12,24,24,24,TRUE,TRUE,TRUE,TRUE
+LandiKotal_A_W26KPK,LandiKotal,Landi Kotal,KPK,USA,Community,44,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22,44,44,44,FALSE,TRUE,TRUE,TRUE
+AkhonColony_B_W24GB,AkhonColony,Skardu,GilgitBaltistan,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+Chak#91DNB_O_W24P,Chak#91DNB,Bahawalpur,Punjab,USA,Community,24,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12,24,24,24,TRUE,TRUE,TRUE,TRUE
+KilliBahotBazarJanubi_O_W24B,KilliBahotBazarJanubi,KechTurbat,Balochistan,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+MubeenFaqirRajar_B_W24S,MubeenFaqirRajar,Sanghar,Sindh,USA,Community,13,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6.5,13,13,13,TRUE,TRUE,TRUE,TRUE
+Darel_A_W24GB,Darel,Diamer,GilgitBaltistan,Canada,Community,45,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22.5,45,45,45,TRUE,TRUE,TRUE,TRUE
+LohiBhir_O_W26P,LohiBhir,Federal,Punjab,USA,Community,15,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,7.5,15,15,15,FALSE,TRUE,TRUE,TRUE
+Faizabad_O_W26KPK,Faizabad,Manshera,KPK,USA,Community,43,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,21.5,43,43,43,FALSE,TRUE,TRUE,TRUE
+ChakirKhanJamli_O_W26B,Chakir Khan Jamli,Jaffarabad,Balochistan,USA,Community,28,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,14,28,28,28,FALSE,TRUE,TRUE,TRUE
+SalehKorBando_O_W26KPK,Saleh Kor Bando,Muhmand Agency,KPK,USA,Community,51,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,25.5,51,51,51,FALSE,TRUE,TRUE,TRUE
+BeenzghaliTirraAkakhel_C_W24KPK,BeenzghaliTirraAkakhel,KhyberAgency,KPK,USA,Community,21,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,10.5,21,21,21,TRUE,TRUE,TRUE,TRUE
+IsraniStation_O_W24P,IsraniStation,Bahawalpur,Punjab,USA,Community,34,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17,34,34,34,TRUE,TRUE,TRUE,TRUE
+Ramli_O_W26P,Ramli,Bahawalpur,Punjab,USA,Community,25,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,FALSE,TRUE,TRUE,TRUE
+Puchguch_A_F22GB,Puchguch,Diamer,GilgitBaltistan,USA,Community,25,2022,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+Hosri_O_W24B,Hosri,Duki,Balochistan,USA,Community,34,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17,34,34,34,TRUE,TRUE,TRUE,TRUE
+Toheedabad_O_W26P,Toheedabad,Muzafargarh,Punjab,USA,Community,31,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,FALSE,TRUE,TRUE,TRUE
+BastiShahWali_O_W24P,BastiShahWali,Bahawalpur,Punjab,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+Ballygond_O_F22GB,Ballygond,Diamer,GilgitBaltistan,Canada,Community,17,2022,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,8.5,17,17,17,TRUE,TRUE,TRUE,TRUE
+BastiToutiMachi_A_W24P,BastiToutiMachi,Rajanpur,Punjab,USA,Community,22,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,TRUE,TRUE,TRUE,TRUE
+LandiKotal_B_W26KPK,LandiKotal,Landi Kotal,KPK,USA,Community,32,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16,32,32,32,FALSE,TRUE,TRUE,TRUE
+KachaKakar_O_W25P,KachaKakar,Rajan Pur,Punjab,Canada,Community,29,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,14.5,29,29,29,TRUE,TRUE,TRUE,TRUE
+AliHassanKK_A_W24S,AliHassanKK,Mirpurkhas,Sindh,USA,Community,21,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,10.5,21,21,21,TRUE,TRUE,TRUE,TRUE
+BastiAllahBaksh_B_W24P,BastiAllahBaksh,Rajanpur,Punjab,USA,Community,30,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15,30,30,30,TRUE,TRUE,TRUE,TRUE
+Qalat_C_W25KPK,Qalat,Kurrum,KPK,Canada,Community,22,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,TRUE,TRUE,TRUE,TRUE
+MergatKhelZawa_C_W24KPK,MergatKhelZawa,KhyberAgency,KPK,USA,Community,32,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16,32,32,32,TRUE,TRUE,TRUE,TRUE
+Rashidabad_O_W26KPK,Rashidabad,Kurrum,KPK,USA,Community,30,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15,30,30,30,FALSE,TRUE,TRUE,TRUE
+QaziRasoolBux_O_W24S,QaziRasoolBux,Sangharh,Sindh,Canada,Community,14,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,7,14,14,14,TRUE,TRUE,TRUE,TRUE
+Sugomila_A_W25KPK,Sugomila,Central Kurrum,KPK,USA,Community,24,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12,24,24,24,TRUE,TRUE,TRUE,TRUE
+AbdulKarimKhashkheli_O_W25S,Abdul Karim Khashkheli,Mirpur Khas,Sindh,USA,Community,20,2025,Active,Active,Active,Active,,TRUE,FALSE,,,15000,5,1,1,1,1,10,20,20,20,TRUE,TRUE,TRUE,TRUE
+Batozai_A_W26B,Batozai,Killa Saif Ullah,Balochistan,USA,Community,45,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22.5,45,45,45,FALSE,TRUE,TRUE,TRUE
+KiliSheikhan_O_W26B,Kili Sheikhan,Harnai,Balochistan,USA,Community,35,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17.5,35,35,35,FALSE,TRUE,TRUE,TRUE
+Lati_B_W24GB,Garbong,Diamer,GilgitBaltistan,USA,Community,31,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,TRUE,TRUE,TRUE,TRUE
+KilliKorkai_O_W25B,Killi Korkai,killa Saif Ullah,Balochistan,Canada,Community,40,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,20,40,40,40,TRUE,TRUE,TRUE,TRUE
+AwaisNagar_O_W25P,Awais Nagar,Jhang,Punjab,USA,Community,30,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15,30,30,30,TRUE,TRUE,TRUE,TRUE
+Darel_A_F22GB,Ghummary,Diamer,GilgitBaltistan,Canada,Community,25,2022,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+KhutriBangla_O_W26P,Khutri Bangla,Bahawalpur,Punjab,USA,Community,35,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17.5,35,35,35,FALSE,TRUE,TRUE,TRUE
+AwaisNagar_O_W26P,Awais Nagar,Jhang,Punjab,USA,Community,29,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,14.5,29,29,29,FALSE,TRUE,TRUE,TRUE
+KotliBalouch_O_W26P,Kotli Balouch,Rahim Yar Khan,Punjab,USA,Community,23,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,FALSE,TRUE,TRUE,TRUE
+Ghummary_A_F22GB,Ghummary,Diamer,GilgitBaltistan,USA,Community,36,2022,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,18,36,36,36,TRUE,TRUE,TRUE,TRUE
+BastiKamalShah_O_W24P,BastiKamalShah,Rajanpur,Punjab,USA,Community,19,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,9.5,19,19,19,TRUE,TRUE,TRUE,TRUE
+GothSanwaChattar_O_W24B,GothSanwaChattar,Naseerabad,Balochistan,USA,Community,32,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16,32,32,32,TRUE,TRUE,TRUE,TRUE
+Fazalabad_O_W24KPK,Fazalabad,Kurrum,KPK,USA,Community,40,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,20,40,40,40,TRUE,TRUE,TRUE,TRUE
+KilliSurkhanBakhtiyarKhan_B_W24B,KilliSurkhanBakhtiyarKhan,KillaSaifullah,Balochistan,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+Lati_A_W24GB,Lati,Diamer,GilgitBaltistan,USA,Community,32,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16,32,32,32,TRUE,TRUE,TRUE,TRUE
+Hargisa_B_W26GB,Hargisa,Skardu,GilgitBaltistan,USA,Community,39,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,19.5,39,39,39,FALSE,TRUE,TRUE,TRUE
+MergatKhelZawa_A_W24KPK,MergatKhelZawa,KhyberAgency,KPK,USA,Community,22,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,TRUE,TRUE,TRUE,TRUE
+GohtHalaniWaryo_O_W26B,Goht Halani Waryo,Lasbela,Balochistan,USA,Community,32,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16,32,32,32,FALSE,TRUE,TRUE,TRUE
+KilliKhaliqAbad_O_W26B,Killi Khaliq Abad,Sibbi,Balochistan,USA,Community,45,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22.5,45,45,45,FALSE,TRUE,TRUE,TRUE
+TibiHootMahar_A_W24P,TibiHootMahar,Bahawalpur,Punjab,USA,Community,13,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6.5,13,13,13,TRUE,TRUE,TRUE,TRUE
+Chak#93DB_O_W24P,Chak#93DB,Bahawalpur,Punjab,USA,Community,23,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+Soivehar_O_W26P,Soivehar,Bahawalpur,Punjab,USA,Community,35,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17.5,35,35,35,FALSE,TRUE,TRUE,TRUE
+IsraniStationNorth_O_W26P,Israni Station North,Bahawalpur,Punjab,USA,Community,40,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,20,40,40,40,FALSE,TRUE,TRUE,TRUE
+KilliFarooqabad_A_W24B,KilliFarooqabad,Mastung,Balochistan,USA,Community,33,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16.5,33,33,33,TRUE,TRUE,TRUE,TRUE
+Khanewal_O_W23P,Khanewal,Khanewal,Punjab,USA,Community,5,2019,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,2.5,5,5,5,TRUE,TRUE,TRUE,TRUE
+DodobirHamani_O_W26S,DodobirHamani,,Sindh,USA,Community,26,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13,26,26,26,FALSE,TRUE,TRUE,TRUE
+Hargisa_A_W26GB,Hargisa,Skardu,GilgitBaltistan,USA,Community,38,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,19,38,38,38,FALSE,TRUE,TRUE,TRUE
+Bhujbar_O_W26S,Bhujbar,Umer Kot,Sindh,USA,Community,52,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,26,52,52,52,FALSE,TRUE,TRUE,TRUE
+Puchguch_B_F22GB,Puchguch,Diamer,GilgitBaltistan,USA,Community,20,2022,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,10,20,20,20,TRUE,TRUE,TRUE,TRUE
+KhanBaiKhelomela_A_W24KPK,KhanBaiKhelomela,KhyberAgency,KPK,USA,Community,23,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+Khyber_O_W26KPK,Khyber,Khyber Agency,KPK,USA,Community,22,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,FALSE,TRUE,TRUE,TRUE
+BastiMahchi_O_W24P,BastiMahchi,Bahawalpur,Punjab,USA,Community,35,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,17.5,35,35,35,TRUE,TRUE,TRUE,TRUE
+BastiAllahBaksh_A_W24P,BastiAllahBaksh,Rajanpur,Punjab,USA,Community,33,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16.5,33,33,33,TRUE,TRUE,TRUE,TRUE
+BastiRafiqabad_O_W24P,BastiRafiqabad,Bahawalpur,Punjab,USA,Community,41,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,20.5,41,41,41,TRUE,TRUE,TRUE,TRUE
+BastiSheikhShujra_O_W24P,BastiSheikhShujra,Bahawalpur,Punjab,USA,Community,23,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+Qalat_B_W25KPK,Qalat,Kurrum,KPK,Canada,Community,24,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12,24,24,24,TRUE,TRUE,TRUE,TRUE
+KilliSharifabad_B_W26B,Killi Sharifabad,Killa Saif Ullah,Balochistan,USA,Community,12,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6,12,12,12,FALSE,TRUE,TRUE,TRUE
+MuhammadiColony_O_W24F,Muhammadi Colony,Rawalpindi,Federal,USA,Community,17,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,8.5,17,17,17,TRUE,TRUE,TRUE,TRUE
+GohtKundi_O_W24B,GohtKundi,Naseerabad,Balochistan,USA,Community,22,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11,22,22,22,TRUE,TRUE,TRUE,TRUE
+Khairava_B_W25B,Khairava,Khuzdar,Balochistan,Canada,Community,19,2025,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,9.5,19,19,19,TRUE,TRUE,TRUE,TRUE
+Kolpur_A_W26B,Kolpur,Kolpur,Balochistan,USA,Community,44,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22,44,44,44,FALSE,TRUE,TRUE,TRUE
+MergatKhelZawa_B_W24KPK,MergatKhelZawa,KhyberAgency,KPK,USA,Community,12,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6,12,12,12,TRUE,TRUE,TRUE,TRUE
+BaghatMehraj_O_W24S,BaghatMehraj,Mirpurkhas,Sindh,USA,Community,20,2020,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,10,20,20,20,TRUE,TRUE,TRUE,TRUE
+MoreKhunda_O_W24P,MoreKhunda,NankanaSahib,Punjab,USA,Community,8,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,4,8,8,8,TRUE,TRUE,TRUE,TRUE
+MubeenFaqirRajar_A_W24S,MubeenFaqirRajar,Sanghar,Sindh,USA,Community,12,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,6,12,12,12,TRUE,TRUE,TRUE,TRUE
+Dharabi_A_W26B,Dharabi,Kachi,Balochistan,USA,Community,32,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,16,32,32,32,FALSE,TRUE,TRUE,TRUE
+LundaPhatak_O_W25P,Lunda Phatak,Rahim Yar Khan,Punjab,Canada,Community,19,2025,Active,Active,Active,Active,,TRUE,FALSE,,,15000,5,1,1,1,1,9.5,19,19,19,TRUE,TRUE,TRUE,TRUE
+KilliSurkhanBakhtiyarKhan_A_W24B,KilliSurkhanBakhtiyarKhan,KillaSaifullah,Balochistan,USA,Community,25,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,12.5,25,25,25,TRUE,TRUE,TRUE,TRUE
+KilliSheikhMusaBaba_O_W24B,KilliSheikhMusaBaba,Harnai,Balochistan,USA,Community,37,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,18.5,37,37,37,TRUE,TRUE,TRUE,TRUE
+MirpurKhas_O_W26S,Mirpur Khas,MirPur Khas,Sindh,USA,Community,39,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,19.5,39,39,39,FALSE,TRUE,TRUE,TRUE
+KandayWalaBastiMetla_O_W24P,BastiShahWali,Bahawalpur,Punjab,USA,Community,15,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,7.5,15,15,15,TRUE,TRUE,TRUE,TRUE
+BastiKhaninArain_O_W24P,BastiKhaninArain,Bahawalpur,Punjab,USA,Community,45,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22.5,45,45,45,TRUE,TRUE,TRUE,TRUE
+BastiHabibabad_O_W24P,BastiHabibabad,Bahawalpur,Punjab,USA,Community,14,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,7,14,14,14,TRUE,TRUE,TRUE,TRUE
+Dharabi_B_W26B,Dharabi,Kachi,Balochistan,USA,Community,27,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13.5,27,27,27,FALSE,TRUE,TRUE,TRUE
+HayatShah_O_W25S,Hayat Shah,Mirpur Khas,Sindh,USA,Community,11,2025,Active,Active,Active,Active,,TRUE,FALSE,,,15000,5,1,1,1,1,5.5,11,11,11,TRUE,TRUE,TRUE,TRUE
+MirDurMuhammadRind_O_W26B,Mir Dur Muhammad Rind,Jaffarabad,Balochistan,USA,Community,31,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,15.5,31,31,31,FALSE,TRUE,TRUE,TRUE
+ModelTownManawala_B_W24P,ModelTownManawala,Sheikhupura,Punjab,Canada,Community,23,2024,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,11.5,23,23,23,TRUE,TRUE,TRUE,TRUE
+BastiWaryamLarr_O_W26P,Basti Waryam Larr,Rahimyar Khan,Punjab,USA,Community,41,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,20.5,41,41,41,FALSE,TRUE,TRUE,TRUE
+Jabori_O_W26KPK,Jabori,Manshehra,KPK,USA,Community,44,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,22,44,44,44,FALSE,TRUE,TRUE,TRUE
+MuhammadAbadColonyAhmadpur_O_W26P,Muhammad Abad Colony Ahmadpur,Bahawalpur,Punjab,USA,Community,26,2026,Active,Active,Active,Active,,FALSE,FALSE,,,15000,5,1,1,1,1,13,26,26,26,FALSE,TRUE,TRUE,TRUE

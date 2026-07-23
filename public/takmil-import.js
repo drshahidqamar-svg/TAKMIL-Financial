@@ -110,20 +110,27 @@
       headers: ['name', 'village', 'district', 'region', 'sponsor', 'type', 'students', 'established',
         'q1Status', 'q2Status', 'q3Status', 'q4Status', 'notes', 'hasSolar', 'prevYearTech',
         'schoolCoordinator', 'regionalCoordinator', 'teacherMonthlySalary',
-        'Chromebooks', 'Laptops', 'USB Drives', 'Learning Mats', 'Lesson Planners',
-        'Books', 'School Bags', 'Stationery Kits', 'Assessment Photocopies',
         'Projectors', 'Whiteboards', 'School Banners', 'Internet Allowance'],
       hints: {
         students: 'number', established: 'year e.g. 2022', sponsor: 'sponsor name (or use "Funded By")',
         q1Status: SCHOOL_STATUS.join(' / '), hasSolar: 'true/false', prevYearTech: 'true/false',
         schoolCoordinator: 'person name (text)', regionalCoordinator: 'person name (text)',
-        teacherMonthlySalary: 'USD/mo, blank = global rate',
-        Chromebooks: 'quantity', Projectors: 'true/false (yes-no item)',
-        Whiteboards: 'true/false', 'School Banners': 'true/false', 'Internet Allowance': 'true/false',
+        teacherMonthlySalary: 'per-school override, blank = global rate',
+        Projectors: 'quarters: Q1 / Q1,Q3 / all / blank',
+        Whiteboards: 'quarters: Q1 / Q1,Q3 / all / blank',
+        'School Banners': 'quarters: Q1 / Q1,Q3 / all / blank',
+        'Internet Allowance': 'quarters: Q1 / Q1,Q3 / all / blank',
       },
       // turn a model object into a flat CSV row
       toRow: s => {
-        const it = s.items || {};
+        const iq = s.itemQ || {};
+        const qStr = k => {
+          const f = iq[k];
+          if (!Array.isArray(f)) return '';
+          const on = [1, 2, 3, 4].filter((q, i) => f[i]);
+          if (on.length === 4) return 'all';
+          return on.map(q => 'Q' + q).join(',');
+        };
         return {
           name: s.name, village: s.village, district: s.district, region: s.region,
           sponsor: s.sponsor || '', type: s.type,
@@ -133,13 +140,8 @@
           notes: s.notes || '', hasSolar: s.hasSolar !== false, prevYearTech: !!s.prevYearTech,
           schoolCoordinator: s.schoolCoordinator || '', regionalCoordinator: s.regionalCoordinator || '',
           teacherMonthlySalary: s.teacherMon == null ? '' : s.teacherMon,
-          Chromebooks: it['Chromebooks'] || 0, Laptops: it['Laptops'] || 0,
-          'USB Drives': it['USB Drives'] || 0, 'Learning Mats': it['Learning Mats'] || 0,
-          'Lesson Planners': it['Lesson Planners'] || 0, Books: it['Books'] || 0,
-          'School Bags': it['School Bags'] || 0, 'Stationery Kits': it['Stationery Kits'] || 0,
-          'Assessment Photocopies': it['Assessment Photocopies'] || 0,
-          Projectors: !!it['Projectors'], Whiteboards: !!it['Whiteboards'],
-          'School Banners': !!it['School Banners'], 'Internet Allowance': !!it['Internet Allowance'],
+          Projectors: qStr('Projectors'), Whiteboards: qStr('Whiteboards'),
+          'School Banners': qStr('School Banners'), 'Internet Allowance': qStr('Internet Allowance'),
         };
       },
       // turn a CSV object into a validated model record (+ errors)
@@ -153,15 +155,23 @@
             errs.push(`${q} "${o[q]}" not one of ${SCHOOL_STATUS.join('/')}`);
         });
         const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : 'Active';
-        // "Funded By" is an alias for sponsor — accept either column
         const sponsor = (o.sponsor || o['Funded By'] || o['funded by'] || '').trim();
-        // per-school item quantities / flags
-        const QTY_ITEMS = ['Chromebooks', 'Laptops', 'USB Drives', 'Learning Mats',
-          'Lesson Planners', 'Books', 'School Bags', 'Stationery Kits', 'Assessment Photocopies'];
+        // yes/no items: parse quarter spec — "Q1", "Q1,Q3", "all", "true", blank
         const YESNO_ITEMS = ['Projectors', 'Whiteboards', 'School Banners', 'Internet Allowance'];
-        const items = {};
-        QTY_ITEMS.forEach(k => { const n = num(o[k], 0); if (n) items[k] = n; });
-        YESNO_ITEMS.forEach(k => { if (bool(o[k])) items[k] = true; });
+        const parseQuarters = v => {
+          const s = String(v == null ? '' : v).trim().toLowerCase();
+          if (!s) return [false, false, false, false];
+          if (s === 'all' || s === 'true' || s === 'yes' || s === '1') return [true, true, true, true];
+          if (s === 'false' || s === 'no' || s === '0') return [false, false, false, false];
+          const f = [false, false, false, false];
+          s.split(/[,;\s]+/).forEach(tok => {
+            const m = tok.match(/q?([1-4])/);
+            if (m) f[+m[1] - 1] = true;
+          });
+          return f;
+        };
+        const itemQ = {};
+        YESNO_ITEMS.forEach(k => { itemQ[k] = parseQuarters(o[k]); });
         const tms = (o.teacherMonthlySalary === '' || o.teacherMonthlySalary == null)
           ? null : money(o.teacherMonthlySalary, null);
         const rec = {
@@ -178,7 +188,7 @@
           notes: o.notes || '',
           hasSolar: o.hasSolar === '' ? true : bool(o.hasSolar),
           prevYearTech: bool(o.prevYearTech),
-          items: items, teacherMon: tms,
+          itemQ: itemQ, teacherMon: tms,
           infraOverrides: {}, fcoordMon: null,
         };
         return { rec, errs };
