@@ -126,7 +126,13 @@
   }
   window.takmilTotalItemCost = totalItemCost;
 
-  function save() { if (typeof window.scheduleSave === 'function') window.scheduleSave(); }
+  function save() {
+    if (typeof window.scheduleSave === 'function') window.scheduleSave();
+    /* R4: item costs now feed the main budget — refresh dashboard & KPIs */
+    ['updateKPIs','updateSettingsDerived','renderDashboard'].forEach(function(fn){
+      try{ if(typeof window[fn]==='function') window[fn](); }catch(e){}
+    });
+  }
 
   function hookPersist() {
     if (window.serializeD && !window.serializeD.__itemsWrapped) {

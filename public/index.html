@@ -1628,6 +1628,9 @@ function setCurrency(mode){
   el('cur-usd')?.classList.toggle('cur-active', mode==='usd');
   el('cur-pkr')?.classList.toggle('cur-active', mode==='pkr');
   el('cur-label').textContent = mode==='pkr' ? `Rs. · 1$=Rs.${CUR.rate}` : 'USD · $';
+  /* Money INPUTS are typed in the active currency — restate their values
+     and their ($)/(Rs.) labels so what you type matches what you see. */
+  refreshMoneyInputs();
   /* re-render all pages — prices in tables update to new currency */
   updateKPIs();
   renderDashboard();
@@ -1646,7 +1649,28 @@ function setExchangeRate(rate){
   if(el('cur-rate-input'))el('cur-rate-input').value=r;
   if(el('cur-rate-display'))el('cur-rate-display').textContent=r.toLocaleString();
   if(el('cur-label'))el('cur-label').textContent=CUR.mode==='pkr'?`Rs. · 1$ = Rs.${r}`:'USD · $';
+  refreshMoneyInputs();
   if(CUR.mode==='pkr'){ updateKPIs(); renderDashboard(); }
+}
+
+/* Restate money input boxes in the active display currency, and swap their
+   ($) / (Rs.) label suffixes. Stored values always remain USD. */
+function refreshMoneyInputs(){
+  const unit = CUR.mode==='pkr' ? 'Rs.' : '$';
+  const put = (id, usd) => { const e=el(id); if(e) e.value = Math.round(toDisplay(usd)); };
+  put('s-target', D.target);
+  put('s-training', D.training);
+  ['rent','fuel','comms','print','audit','it','bank','field','misc']
+    .forEach(k=>{ if(D.overhead[k]!==undefined) put('o-'+k, D.overhead[k]); });
+  put('a-teacher', D.teacherMon);
+  put('a-fcoord',  D.fcoordMon);
+  put('a-rcoord',  D.rcoordMon);
+  /* update any label that ends in ($) or (Rs.) to the active unit */
+  document.querySelectorAll('.set-label,.mf-label,.o-label,label').forEach(l=>{
+    if(/\(\s*(\$|Rs\.)\s*\)/.test(l.textContent)){
+      l.textContent = l.textContent.replace(/\(\s*(\$|Rs\.)\s*\)/, '('+unit+')');
+    }
+  });
 }
 
 const D={
@@ -1889,7 +1913,22 @@ function infraItemTotal(item){ return infraEffectiveQty(item)*(item.up||0); }
 const supPS=()=>D.supply.reduce((a,i)=>a+infraItemTotal(i),0)/Math.max(activeSchoolCount(),1);
 /* supAll = supply × active schools */
 const supAll=(s)=>{const sc=s||activeSchoolCount();return sc*D.supply.reduce((a,i)=>a+i.up*(infraQty(i)/Math.max(D.schools,1)),0);};
-const supTotal=()=>D.supply.reduce((a,i)=>a+infraItemTotal(i),0);
+const supTotal=()=>{
+  /* R4 FIX: if the per-school item system (takmil-schoolitems.js) is active,
+     use its real per-school, per-quarter costs instead of the old formula
+     that assumed every school gets every item. Falls back to old system. */
+  if(typeof window.takmilTotalItemCost==='function'){
+    try{ const v=window.takmilTotalItemCost(0); if(v||v===0) return v; }catch(e){}
+  }
+  return D.supply.reduce((a,i)=>a+infraItemTotal(i),0);
+};
+/* Per-quarter supply cost from the new per-school item system (quarter 1-4). */
+function supQuarter(qi){
+  if(typeof window.takmilTotalItemCost==='function'){
+    try{ return window.takmilTotalItemCost(qi)||0; }catch(e){}
+  }
+  return D.supply.reduce((a,item)=>((item.releaseQ||1)===qi?a+infraItemTotal(item):a),0);
+}
 const totCost=(s,st)=>{return fieldAnn(s||activeSchoolCount())+supTotal()+hqAnn()+overhead()+D.training;};
 const cpc=(s,st)=>{const students=st||activeStudentCount();return students>0?totCost(s,st)/students:0;};
 
@@ -2026,9 +2065,24 @@ function updateSettingsDerived(){
   if(el('d-sps'))         el('d-sps').textContent         = s>0?(st/s).toFixed(1):'—';
   if(el('d-fc'))          el('d-fc').textContent           = nFC();
   if(el('d-rc'))          el('d-rc').textContent           = nRC();
-  if(el('d-books'))       el('d-books').textContent        = Math.ceil(st/bookRatio).toLocaleString();
-  if(el('d-chromebooks')) el('d-chromebooks').textContent  = (s*chromePer).toLocaleString();
-  if(el('d-assessments')) el('d-assessments').textContent  = (st*assessPer).toLocaleString();
+  /* R4 FIX: when the per-school item system is active, sum the REAL per-school
+     quantities (only schools actually ticked for that item), instead of the
+     old "all schools × ratio" formula. */
+  function sumQty(itemKey, fallback){
+    if(typeof window.takmilItemQty==='function' && typeof window.takmilItemFlags==='function'){
+      try{
+        return (D.schoolsList||[]).reduce((a,sc)=>{
+          const f=window.takmilItemFlags(sc,itemKey);
+          const gets = Array.isArray(f) && f.some(Boolean);
+          return a + (gets ? window.takmilItemQty(sc,itemKey) : 0);
+        },0);
+      }catch(e){}
+    }
+    return fallback;
+  }
+  if(el('d-books'))       el('d-books').textContent        = sumQty('Books', Math.ceil(st/bookRatio)).toLocaleString();
+  if(el('d-chromebooks')) el('d-chromebooks').textContent  = sumQty('Chromebooks', s*chromePer).toLocaleString();
+  if(el('d-assessments')) el('d-assessments').textContent  = sumQty('Assessment Photocopies', st*assessPer).toLocaleString();
   if(el('d-overhead'))    el('d-overhead').textContent     = f$(overhead());
   const cpv = cpc(); const over = cpv>D.target;
   if(el('d-live-cpc')){
@@ -2051,12 +2105,13 @@ function recalc(){
   D.students=+el('s-students').value||4600;
   D.schCoord=+(el('s-schcoord')?.value)||10;
   D.coordRC=+(el('s-coordrc')?.value)||4;
-  D.target=+el('s-target').value||100;
-  D.training=+el('s-training').value||0;
-  ['rent','fuel','comms','print','audit','it','bank','field','misc'].forEach(k=>{const e=el('o-'+k);if(e)D.overhead[k]=+e.value||0;});
-  if(el('a-teacher'))D.teacherMon=+el('a-teacher').value||150;
-  if(el('a-fcoord'))D.fcoordMon=+el('a-fcoord').value||300;
-  if(el('a-rcoord'))D.rcoordMon=+el('a-rcoord').value||500;
+  /* Money inputs are typed in the ACTIVE display currency; store as USD. */
+  D.target=fromDisplay(+el('s-target').value)||100;
+  D.training=fromDisplay(+el('s-training').value)||0;
+  ['rent','fuel','comms','print','audit','it','bank','field','misc'].forEach(k=>{const e=el('o-'+k);if(e)D.overhead[k]=fromDisplay(+e.value)||0;});
+  if(el('a-teacher'))D.teacherMon=fromDisplay(+el('a-teacher').value)||150;
+  if(el('a-fcoord'))D.fcoordMon=fromDisplay(+el('a-fcoord').value)||300;
+  if(el('a-rcoord'))D.rcoordMon=fromDisplay(+el('a-rcoord').value)||500;
   updateKPIs();
   updateSettingsDerived();
   if(el('av-teacher'))el('av-teacher').textContent=f$(D.teacherMon);
@@ -2082,11 +2137,9 @@ function updateKPIs(){
   const qActStudents=qCols.map((q,i)=>
     D.schoolsList.filter(s=>(s[q]||'Active')==='Active').reduce((a,s)=>a+s.students,0));
 
-  /* quarterly budgets: supply items land in their releaseQ quarter; HR costs use startQ/endQ */
-  /* Supply: each item's full cost lands in its releaseQ quarter (one-time) */
-  const qSupplyCosts = [1,2,3,4].map(qi=>{
-    return D.supply.reduce((a,item)=>{ return (item.releaseQ||1)===qi ? a+infraItemTotal(item) : a; },0);
-  });
+  /* quarterly budgets: supply items land in their ticked quarter(s) per school; HR costs use startQ/endQ */
+  /* R4 FIX: use the per-school item system so imported quarter data drives the numbers */
+  const qSupplyCosts = [1,2,3,4].map(qi=>supQuarter(qi));
   /* HQ HR cost per quarter: only non-FC/non-RC staff, filtered by startQ/endQ */
   const qHRCosts = [1,2,3,4].map(qi=>{
     return D.hrList.filter(h=>h.mon>0&&!h.isFC&&!h.isRC).reduce((a,h)=>{
