@@ -147,6 +147,24 @@
   }
   window.takmilItemBreakdown = itemBreakdown;
 
+  // Annual cost of one item for a TYPICAL school (avg students), assuming the
+  // item is delivered (full year for monthly items). Used for the Settings
+  // "Annual cost/school" column so the number is concrete.
+  function annualCostPerSchool(key) {
+    var it = BY_KEY[key]; if (!it) return 0;
+    var c = cfg();
+    var d = D();
+    var avgStudents = (d.schools > 0 && d.students) ? Math.round(d.students / d.schools) : (d.students || 30);
+    var qty;
+    if (it.basis === 'ratio')          qty = Math.max(0, Math.ceil(avgStudents / (+c.ratios[key] || 1)));
+    else if (it.basis === 'perSchool') qty = +c.perCounts[key] || 1;
+    else                               qty = avgStudents; // perStudent
+    var price = (c.prices[key] && c.prices[key][0]) || 0; // Q1 price as the base
+    var months = (c.freq[key] === 'monthly') ? 12 : 1;
+    return qty * price * months;
+  }
+  window.takmilAnnualPerSchool = annualCostPerSchool;
+
   function save() {
     if (typeof window.scheduleSave === 'function') window.scheduleSave();
     /* R4: item costs now feed the main budget — refresh dashboard & KPIs */
@@ -314,6 +332,7 @@
         '<div style="overflow-x:auto;margin-top:8px"><table class="si-ptbl" style="width:100%"><thead><tr>' +
         '<th style="text-align:left">Item</th><th>Quantity rule</th><th>Frequency</th>' +
         '<th>Unit price</th><th>Q1 price</th><th>Q2 price</th><th>Q3 price</th><th>Q4 price</th>' +
+        '<th style="background:var(--bg2)">Annual cost / school</th>' +
         '</tr></thead><tbody id="si-set-prices"></tbody></table></div>' +
         '<p class="si-note">Once/year items are charged once in the delivery quarter ticked per school. ' +
         'Monthly items (stationery, assessment, internet) charge 3 months \u00d7 price for each ticked quarter. ' +
@@ -346,7 +365,13 @@
       var unitVal = allEqual ? Math.round(toDisp(p[0] || 0)) : '';
       var unitCell = '<td><input type="number" min="0" step="1" value="' + unitVal +
         '" placeholder="\u2013" data-sunit="' + it.k + '" style="width:80px;font-weight:600"></td>';
-      return '<tr><td style="text-align:left">' + it.k + '</td>' + ruleCell + freqCell + unitCell + priceCells + '</tr>';
+      var annual = annualCostPerSchool(it.k);
+      var qtyNote = it.basis === 'ratio' ? '\u2308stu\u00f7' + (c.ratios[it.k] || '?') + '\u2309'
+        : it.basis === 'perStudent' ? 'stu' : (c.perCounts[it.k] || 1);
+      var freqNote = c.freq[it.k] === 'monthly' ? ' \u00d712mo' : '';
+      var annualCell = '<td style="background:var(--bg2);font-weight:600;white-space:nowrap">' + money(annual) +
+        '<div style="font-size:9px;color:var(--text3);font-weight:400">' + qtyNote + '\u00d7price' + freqNote + '</div></td>';
+      return '<tr><td style="text-align:left">' + it.k + '</td>' + ruleCell + freqCell + unitCell + priceCells + annualCell + '</tr>';
     }).join('');
     var body = document.getElementById('si-set-prices'); if (body) body.innerHTML = rows;
 
