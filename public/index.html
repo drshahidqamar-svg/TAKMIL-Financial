@@ -829,6 +829,9 @@ canvas{display:block}
   </div>
 </div>
 
+<!-- ── R1: Overheads, Projects & Software (populated by takmil-costs.js) ── -->
+<div id="r1-costs-anchor"></div>
+
 <!-- ── Item unit prices (populated by takmil-schoolitems.js) ── -->
 <div class="ps-section" style="margin-top:22px">Item unit prices &amp; rules</div>
 <div id="si-settings-anchor"></div>
@@ -2128,8 +2131,14 @@ function recalc(){
   /* Money inputs are typed in the ACTIVE display currency; store as USD. */
   D.target=fromDisplay(+el('s-target').value)||100;
   D.training=fromDisplay(+el('s-training').value)||0;
-  ['rent','fuel','comms','print','audit','it','bank','field','misc'].forEach(k=>{const e=el('o-'+k);if(e)D.overhead[k]=fromDisplay(+e.value)||0;});
-  if(el('o-naoh'))D.naOverhead=fromDisplay(+el('o-naoh').value)||0;
+  /* R1: when the cost-items module is active it owns overhead & NA overhead.
+     Let it re-mirror its totals; skip the legacy input reads (those fields are hidden). */
+  if(typeof window.takmilSyncCosts==='function'){
+    window.takmilSyncCosts();
+  } else {
+    ['rent','fuel','comms','print','audit','it','bank','field','misc'].forEach(k=>{const e=el('o-'+k);if(e)D.overhead[k]=fromDisplay(+e.value)||0;});
+    if(el('o-naoh'))D.naOverhead=fromDisplay(+el('o-naoh').value)||0;
+  }
   if(el('a-teacher'))D.teacherMon=fromDisplay(+el('a-teacher').value)||150;
   if(el('a-fcoord'))D.fcoordMon=fromDisplay(+el('a-fcoord').value)||300;
   if(el('a-rcoord'))D.rcoordMon=fromDisplay(+el('a-rcoord').value)||500;
@@ -3977,6 +3986,8 @@ try{ window.totCost=totCost; window.cpc=cpc; window.fieldAnn=fieldAnn; window.hq
 <script src="takmil-sim.js"></script>
 <!-- ════ TAKMIL per-school items & costs ════ -->
 <script src="takmil-schoolitems.js"></script>
+<!-- ════ TAKMIL R1: overheads, projects & software with region tags ════ -->
+<script src="takmil-costs.js"></script>
 <!-- ════ TAKMIL projection (what-if cost per child) ════ -->
 <script src="takmil-projection.js"></script>
 </body>
