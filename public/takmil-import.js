@@ -212,7 +212,7 @@
       arr: () => D().hrList,
       headers: ['name', 'role', 'department', 'status', 'monthlySalary', 'startQuarter', 'endQuarter', 'isFieldCoord', 'isRegionalCoord'],
       hints: {
-        department: (window.DEPT_OPTS || ['Management', 'Sustainability', 'Operations', 'Academics', 'Data/LMS', 'Finance', 'Outreach']).join(' / '),
+        department: (window.DEPT_OPTS || ['Management', 'Sustainability', 'Operations', 'Academics', 'Data', 'LMS', 'Finance & HR', 'Outreach', 'North America', 'Marketing']).join(' / '),
         status: STATUS.join(' / '), monthlySalary: 'number (USD/mo)',
         startQuarter: '1-4', endQuarter: '1-4 or blank', isFieldCoord: 'true/false', isRegionalCoord: 'true/false',
       },

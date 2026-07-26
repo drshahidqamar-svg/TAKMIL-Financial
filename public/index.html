@@ -872,7 +872,7 @@ canvas{display:block}
             <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:4px">Department</div>
             <select id="np-dept" style="width:100%">
               <option>Management</option><option>Sustainability</option><option>Operations</option>
-              <option>Academics</option><option>Data/LMS</option><option>Finance</option><option>Outreach</option>
+              <option>Academics</option><option>Data</option><option>LMS</option><option>Finance &amp; HR</option><option>Outreach</option><option>North America</option><option>Marketing</option>
             </select>
           </div>
           <div>
@@ -1484,7 +1484,13 @@ function restoreD(saved) {
   ['schools','students','schCoord','coordRC','target','training','teacherMon',
    'fcoordMon','rcoordMon','nextId'].forEach(k=>{if(saved[k]!==undefined)D[k]=saved[k];});
   if(saved.overhead)   Object.assign(D.overhead,saved.overhead);
-  if(saved.hrList&&saved.hrList.length)   D.hrList=saved.hrList.map(h=>Object.assign({startQ:1,endQ:null,isFC:false,isRC:false},h));
+  if(saved.hrList&&saved.hrList.length)   D.hrList=saved.hrList.map(h=>{
+    const m=Object.assign({startQ:1,endQ:null,isFC:false,isRC:false},h);
+    /* R2 migration: old dept names -> new ones */
+    if(m.d==='Data/LMS'||m.d==='LMS/Data') m.d='Data';
+    if(m.d==='Finance') m.d='Finance & HR';
+    return m;
+  });
   if(saved.supply&&saved.supply.length)   D.supply=saved.supply.map(i=>Object.assign({solarOnly:false,techItem:false,releaseQ:1},i));
   if(saved.versions&&saved.versions.length) D.versions=saved.versions;
   if(saved.changelog&&saved.changelog.length) D.changelog=saved.changelog;
@@ -1699,15 +1705,15 @@ const D={
     {id:11,n:'Nazia Noor',r:'SEL Coordinator',d:'Academics',s:'Active',mon:400,startQ:1,endQ:null},
     {id:12,n:'Zartashia',r:'Academic M&E',d:'Academics',s:'Active',mon:400,startQ:1,endQ:null},
     {id:13,n:'Sobia Asghar',r:'Curriculum Dev',d:'Academics',s:'Active',mon:400,startQ:1,endQ:null},
-    {id:14,n:'Amna',r:'Data/LMS Lead',d:'Data/LMS',s:'Active',mon:500,startQ:1,endQ:null},
-    {id:15,n:'Ramish',r:'LMS Coordinator',d:'Data/LMS',s:'Active',mon:400,startQ:1,endQ:null},
-    {id:16,n:'Shahid Ali',r:'Data Reporting',d:'Data/LMS',s:'Active',mon:350,startQ:1,endQ:null},
-    {id:17,n:'(Vacant)',r:'Data Coordinator',d:'Data/LMS',s:'Vacant',mon:400,startQ:1,endQ:null},
-    {id:18,n:'M. Tarim',r:'Finance & Reg',d:'Finance',s:'Active',mon:500,startQ:1,endQ:null},
-    {id:19,n:'Zain',r:'Social Media',d:'Finance',s:'Active',mon:350,startQ:1,endQ:null},
-    {id:20,n:'Hammad',r:'Office Support',d:'Finance',s:'Active',mon:200,startQ:1,endQ:null},
-    {id:21,n:'Afnan Ahmed',r:'Front-End Dev',d:'Finance',s:'Active',mon:500,startQ:1,endQ:null},
-    {id:22,n:'Komal Kamran',r:'HR Manager',d:'Finance',s:'Active',mon:550,startQ:1,endQ:null},
+    {id:14,n:'Amna',r:'Data/LMS Lead',d:'Data',s:'Active',mon:500,startQ:1,endQ:null},
+    {id:15,n:'Ramish',r:'LMS Coordinator',d:'Data',s:'Active',mon:400,startQ:1,endQ:null},
+    {id:16,n:'Shahid Ali',r:'Data Reporting',d:'Data',s:'Active',mon:350,startQ:1,endQ:null},
+    {id:17,n:'(Vacant)',r:'Data Coordinator',d:'Data',s:'Vacant',mon:400,startQ:1,endQ:null},
+    {id:18,n:'M. Tarim',r:'Finance & Reg',d:'Finance & HR',s:'Active',mon:500,startQ:1,endQ:null},
+    {id:19,n:'Zain',r:'Social Media',d:'Finance & HR',s:'Active',mon:350,startQ:1,endQ:null},
+    {id:20,n:'Hammad',r:'Office Support',d:'Finance & HR',s:'Active',mon:200,startQ:1,endQ:null},
+    {id:21,n:'Afnan Ahmed',r:'Front-End Dev',d:'Finance & HR',s:'Active',mon:500,startQ:1,endQ:null},
+    {id:22,n:'Komal Kamran',r:'HR Manager',d:'Finance & HR',s:'Active',mon:550,startQ:1,endQ:null},
     {id:23,n:'Wajeeha',r:'Outreach Lead',d:'Outreach',s:'Active',mon:500,startQ:1,endQ:null},
     {id:24,n:'Urooj Safeer',r:'Asst Outreach',d:'Outreach',s:'Active',mon:350,startQ:1,endQ:null},
     {id:25,n:'Samina Mustafa',r:'Asst Outreach',d:'Outreach',s:'Active',mon:350,startQ:1,endQ:null},
@@ -1938,7 +1944,7 @@ const totCost=(s,st)=>{return fieldAnn(s||activeSchoolCount())+supTotal()+hqAnn(
 const cpc=(s,st)=>{const students=st||activeStudentCount();return students>0?totCost(s,st)/students:0;};
 
 const STATUS_BG={Active:'var(--accent)',Flood:'var(--blue)','War/Conflict':'var(--red)',Migration:'var(--amber)',Graduated:'var(--purple)',Suspended:'var(--text3)'};
-const DEPT_OPTS=['Management','Sustainability','Operations','Academics','Data/LMS','Finance','Outreach'];
+const DEPT_OPTS=['Management','Sustainability','Operations','Academics','Data','LMS','Finance & HR','Outreach','North America','Marketing'];
 const STAFF_STAT=['Active','Hiring','Vacant','Issue','On Leave'];
 const STAT_BADGE={Active:'bg-g',Hiring:'bg-p',Vacant:'bg-a',Issue:'bg-r','On Leave':'bg-b'};
 const Q_OPTS=['Active','Flood','War/Conflict','Migration','Graduated','Suspended'];
@@ -2361,8 +2367,8 @@ function renderDashboard(){
   const RCOORD_COLOR = '#8b5cf6';
   const DEPT_COLORS  = {
     'Management':'#10b981','Sustainability':'#f59e0b','Operations':'#ec4899',
-    'Academics':'#f97316','Data/LMS':'#e85555','Finance':'#9b6dff',
-    'Outreach':'#0fb8a0','Other':'#64748b'
+    'Academics':'#f97316','Data':'#e85555','LMS':'#e07a5f','Finance & HR':'#9b6dff',
+    'Outreach':'#0fb8a0','North America':'#3b82f6','Marketing':'#d4537e','Other':'#64748b'
   };
 
   const salRows = [
