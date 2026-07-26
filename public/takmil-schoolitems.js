@@ -248,6 +248,68 @@
     });
   }
 
+  // ── Full item price table for the Programme Settings page ──
+  function renderSettingsPrices() {
+    var anchor = document.getElementById('si-settings-anchor');
+    if (!anchor) return;
+    var c = cfg();
+    if (!anchor.__built) {
+      anchor.innerHTML =
+        '<div class="si-set-ratios si-ratios" id="si-set-ratios"></div>' +
+        '<div style="overflow-x:auto;margin-top:8px"><table class="si-ptbl" style="width:100%"><thead><tr>' +
+        '<th style="text-align:left">Item</th><th>Quantity rule</th><th>Frequency</th>' +
+        '<th>Q1 price</th><th>Q2 price</th><th>Q3 price</th><th>Q4 price</th>' +
+        '</tr></thead><tbody id="si-set-prices"></tbody></table></div>' +
+        '<p class="si-note">Once/year items are charged once in the delivery quarter ticked per school. ' +
+        'Monthly items (stationery, assessment, internet) charge 3 months \u00d7 price for each ticked quarter. ' +
+        'Per-school delivery quarters are set on the Schools page.</p>';
+      anchor.__built = true;
+    }
+    var rHtml = ITEMS.filter(function (i) { return i.basis === 'ratio'; }).map(function (it) {
+      return '<label class="si-ratio"><span>Students per ' + (it.k === 'Books' ? 'Book set' : it.k) + '</span>' +
+        '<input type="number" min="0.1" step="0.1" value="' + (c.ratios[it.k] || it.ratioDefault) + '" data-sratio="' + it.k + '"></label>';
+    }).join('');
+    var sr = document.getElementById('si-set-ratios'); if (sr) sr.innerHTML = rHtml;
+
+    var rows = ITEMS.map(function (it) {
+      var p = c.prices[it.k];
+      var rule = it.basis === 'ratio' ? 'students \u00f7 ' + (c.ratios[it.k] || '?')
+        : it.basis === 'perStudent' ? '1 per student' : (c.perCounts[it.k] || 1) + ' per school';
+      var ruleCell = it.basis === 'perSchool'
+        ? '<td><input type="number" min="0" step="1" style="width:46px" value="' + (c.perCounts[it.k] || 1) + '" data-spercount="' + it.k + '"> /school</td>'
+        : '<td style="font-size:10px;color:var(--text3)">' + rule + '</td>';
+      var freqCell = '<td><select data-sfreq="' + it.k + '">' +
+        [['annual', 'once/year'], ['monthly', 'monthly \u00d73/qtr']].map(function (m) {
+          return '<option value="' + m[0] + '"' + (c.freq[it.k] === m[0] ? ' selected' : '') + '>' + m[1] + '</option>';
+        }).join('') + '</select></td>';
+      var priceCells = [0, 1, 2, 3].map(function (qi) {
+        return '<td><input type="number" min="0" step="1" value="' + Math.round(toDisp(p[qi] || 0)) +
+          '" data-sprice="' + it.k + '" data-q="' + qi + '" style="width:80px"></td>';
+      }).join('');
+      return '<tr><td style="text-align:left">' + it.k + '</td>' + ruleCell + freqCell + priceCells + '</tr>';
+    }).join('');
+    var body = document.getElementById('si-set-prices'); if (body) body.innerHTML = rows;
+
+    anchor.querySelectorAll('[data-sprice]').forEach(function (inp) {
+      inp.onchange = function () { cfg().prices[inp.dataset.sprice][+inp.dataset.q] = fromDisp(+inp.value || 0); refreshEverything(); };
+    });
+    anchor.querySelectorAll('[data-sfreq]').forEach(function (sel) {
+      sel.onchange = function () { cfg().freq[sel.dataset.sfreq] = sel.value; refreshEverything(); };
+    });
+    anchor.querySelectorAll('[data-spercount]').forEach(function (inp) {
+      inp.onchange = function () { cfg().perCounts[inp.dataset.spercount] = +inp.value || 1; refreshEverything(); };
+    });
+    anchor.querySelectorAll('[data-sratio]').forEach(function (inp) {
+      inp.onchange = function () { cfg().ratios[inp.dataset.sratio] = +inp.value || 0; refreshEverything(); };
+    });
+  }
+
+  function refreshEverything() {
+    renderSettingsPrices();
+    if (document.getElementById('school-items-card')) { try { renderAll(); } catch (e) {} }
+    save();
+  }
+
   function renderTable() {
     var list = D().schoolsList || [];
     var head = '<tr><th class="si-sticky" style="text-align:left">School</th><th>Stu</th>' +
@@ -347,10 +409,16 @@
     w.innerHTML = buildSection();
     page.appendChild(w.firstChild);
     renderAll();
+    renderSettingsPrices(); // also fill the Programme Settings price table
 
     if (window.showPage && !window.showPage.__itemsWrapped) {
       var o = window.showPage;
-      window.showPage = function (pg) { var r = o.apply(this, arguments); if (pg === 'schools') setTimeout(renderAll, 30); return r; };
+      window.showPage = function (pg) {
+        var r = o.apply(this, arguments);
+        if (pg === 'schools') setTimeout(renderAll, 30);
+        if (pg === 'settings') setTimeout(renderSettingsPrices, 30);
+        return r;
+      };
       window.showPage.__itemsWrapped = true;
     }
     if (window.renderSchools && !window.renderSchools.__itemsWrapped) {
@@ -360,7 +428,7 @@
     }
     if (window.setCurrency && !window.setCurrency.__itemsWrapped) {
       var o3 = window.setCurrency;
-      window.setCurrency = function () { var r = o3.apply(this, arguments); setTimeout(renderAll, 20); return r; };
+      window.setCurrency = function () { var r = o3.apply(this, arguments); setTimeout(function(){ renderAll(); renderSettingsPrices(); }, 20); return r; };
       window.setCurrency.__itemsWrapped = true;
     }
   }
@@ -370,7 +438,9 @@
     var iv = setInterval(function () {
       t++; hookPersist();
       if (window.D && document.getElementById('page-schools') && !document.getElementById('school-items-card')) {
-        injectStyles(); inject(); clearInterval(iv);
+        injectStyles(); inject();
+        setTimeout(renderSettingsPrices, 50);
+        clearInterval(iv);
       }
       if (t > 80) clearInterval(iv);
     }, 500);
