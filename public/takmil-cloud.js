@@ -98,6 +98,7 @@
     LAST_SEEN_REV = CURRENT_REV;
 
     const hasDoc = payload.doc && Object.keys(payload.doc).length > 0;
+    if (hasDoc) window.__CLOUD_DOC = payload.doc; // stash for modules that wrap restoreD after load
     if (hasDoc && typeof window.restoreD === 'function') {
       window.restoreD(payload.doc);
     } else if (!hasDoc && SESSION.role !== 'viewer' && typeof window.serializeD === 'function') {
@@ -165,7 +166,7 @@
             api('/model').then(p => {
               CURRENT_REV = p.rev || 0;
               LAST_SEEN_REV = CURRENT_REV;
-              if (typeof window.restoreD === 'function') window.restoreD(p.doc);
+              window.__CLOUD_DOC = p.doc; if (typeof window.restoreD === "function") window.restoreD(p.doc);
               refreshAppUI();
               setIndicator('saved');
               if (typeof window.showPersistToast === 'function')
@@ -194,7 +195,7 @@
     window.cloudReload = async function () {
       const p = await api('/model');
       CURRENT_REV = p.rev || 0;
-      if (typeof window.restoreD === 'function') window.restoreD(p.doc);
+      window.__CLOUD_DOC = p.doc; if (typeof window.restoreD === "function") window.restoreD(p.doc);
       refreshAppUI();
       if (typeof window.showPersistToast === 'function') window.showPersistToast('✓ Reloaded latest from cloud');
     };

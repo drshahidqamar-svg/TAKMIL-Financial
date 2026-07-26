@@ -166,8 +166,21 @@
   window.takmilAnnualPerSchool = annualCostPerSchool;
 
   function save() {
+    /* Warn if the current user can't actually save (viewer role) — otherwise
+       edits silently vanish, which looks like "prices didn't save". */
+    try {
+      if (window.SESSION && window.SESSION.role === 'viewer') {
+        if (typeof window.showPersistToast === 'function')
+          window.showPersistToast('\u26a0 You are a viewer — changes are not saved. Ask an admin for editor access.', true);
+        return;
+      }
+    } catch (e) {}
     if (typeof window.scheduleSave === 'function') window.scheduleSave();
-    /* R4: item costs now feed the main budget — refresh dashboard & KPIs */
+    /* Also trigger an immediate save so price edits persist even if the user
+       navigates away before the 1.5s debounce fires. */
+    if (typeof window.saveToStorage === 'function') {
+      try { window.saveToStorage(false); } catch (e) {}
+    }
     ['updateKPIs','updateSettingsDerived','renderDashboard'].forEach(function(fn){
       try{ if(typeof window[fn]==='function') window[fn](); }catch(e){}
     });
@@ -205,6 +218,26 @@
         } catch (e) {}
       };
       window.restoreD.__itemsWrapped = true;
+    }
+    /* Fix stale-load race: the cloud bridge may have already called restoreD
+       (loading the saved doc) BEFORE this module wrapped it — so our saved
+       item prices/timing were skipped. If a cloud doc was stashed, re-apply
+       our part of it ONCE. */
+    if (!hookPersist.__reapplied) {
+      try {
+        var cd = window.__CLOUD_DOC;
+        if (cd) {
+          if (cd.itemCfg) D().itemCfg = cd.itemCfg;
+          if (Array.isArray(cd.schoolsList)) {
+            cd.schoolsList.forEach(function (row, i) {
+              if (row.itemQ && D().schoolsList[i]) D().schoolsList[i].itemQ = row.itemQ;
+            });
+          }
+          hookPersist.__reapplied = true;
+          // refresh any visible item UI with the restored prices
+          setTimeout(function () { try { if (typeof renderAll === 'function') renderAll(); if (typeof renderSettingsPrices === 'function') renderSettingsPrices(); } catch (e) {} }, 100);
+        }
+      } catch (e) {}
     }
   }
 
@@ -531,7 +564,10 @@
     var t = 0;
     var iv = setInterval(function () {
       t++; hookPersist();
-      if (window.D && document.getElementById('page-schools') && !document.getElementById('school-items-card')) {
+      // Wait for the cloud doc to be applied (or ~6s) before finishing setup,
+      // so restored item prices aren't missed on a slow load.
+      var cloudSettled = hookPersist.__reapplied || !!window.__CLOUD_DOC || t > 12;
+      if (window.D && document.getElementById('page-schools') && !document.getElementById('school-items-card') && cloudSettled) {
         injectStyles(); inject();
         setTimeout(renderSettingsPrices, 50);
         clearInterval(iv);
