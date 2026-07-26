@@ -131,6 +131,22 @@
   }
   window.takmilTotalItemCost = totalItemCost;
 
+  // Per-item summary across all schools: how many schools get it, total units, total cost.
+  function itemBreakdown(quarter) {
+    var list = D().schoolsList || [];
+    return ITEMS.map(function (it) {
+      var schoolsWith = 0, units = 0, cost = 0;
+      list.forEach(function (s) {
+        var f = qFlags(s, it.k);
+        var gets = Array.isArray(f) && f.some(Boolean);
+        if (gets) { schoolsWith++; units += qtyFor(s, it.k); }
+        cost += itemCostQ(s, it.k, quarter);
+      });
+      return { k: it.k, freq: cfg().freq[it.k], schools: schoolsWith, units: units, cost: cost };
+    }).sort(function (a, b) { return b.cost - a.cost; });
+  }
+  window.takmilItemBreakdown = itemBreakdown;
+
   function save() {
     if (typeof window.scheduleSave === 'function') window.scheduleSave();
     /* R4: item costs now feed the main budget — refresh dashboard & KPIs */
@@ -174,6 +190,38 @@
     }
   }
 
+  var BREAK_Q = 0;
+  function renderBreakdown() {
+    var body = document.getElementById('si-breakdown-body');
+    if (!body) return;
+    var rows = itemBreakdown(BREAK_Q);
+    var grand = rows.reduce(function (a, r) { return a + r.cost; }, 0) || 1;
+    var totalSchools = (D().schoolsList || []).length;
+    body.innerHTML = rows.map(function (r) {
+      var pct = Math.round(r.cost / grand * 100);
+      var warn = (r.schools === totalSchools && totalSchools > 0)
+        ? ' <span title="Every school is ticked for this item" style="color:var(--amber)">\u26a0 all</span>' : '';
+      return '<tr>' +
+        '<td style="text-align:left">' + r.k + '</td>' +
+        '<td style="font-size:10px;color:var(--text3)">' + (r.freq === 'monthly' ? 'monthly \u00d73' : 'once/yr') + '</td>' +
+        '<td>' + r.schools + ' / ' + totalSchools + warn + '</td>' +
+        '<td>' + r.units.toLocaleString() + '</td>' +
+        '<td style="font-weight:600">' + money(r.cost) + '</td>' +
+        '<td>' + pct + '%</td>' +
+        '</tr>';
+    }).join('') +
+      '<tr style="border-top:2px solid var(--border2)"><td style="text-align:left;font-weight:600">TOTAL</td><td></td><td></td><td></td>' +
+      '<td style="font-weight:700;color:var(--accent)">' + money(grand) + '</td><td>100%</td></tr>';
+
+    document.querySelectorAll('[data-bq]').forEach(function (b) {
+      b.onclick = function () {
+        BREAK_Q = +b.dataset.bq;
+        document.querySelectorAll('[data-bq]').forEach(function (x) { x.classList.toggle('on', +x.dataset.bq === BREAK_Q); });
+        renderBreakdown();
+      };
+    });
+  }
+
   var VIEW_Q = 0; // 0 = full year, 1..4 = that quarter
 
   function buildSection() {
@@ -187,6 +235,13 @@
       '<th style="text-align:left">Item</th><th>Quantity rule</th><th>Frequency</th>' +
       '<th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th>' +
       '</tr></thead><tbody id="si-prices"></tbody></table></div></details>' +
+      '<div class="si-grp" style="margin-top:14px">Cost breakdown by item ' +
+      '<span class="si-qsel">View: ' +
+      [0,1,2,3,4].map(function(q){return '<button class="si-bqbtn'+(q===0?' on':'')+'" data-bq="'+q+'">'+(q?'Q'+q:'Year')+'</button>';}).join('') +
+      '</span></div>' +
+      '<div style="overflow-x:auto"><table class="si-ptbl" style="width:100%"><thead><tr>' +
+      '<th style="text-align:left">Item</th><th>Frequency</th><th>Schools receiving</th><th>Total units</th><th>Total cost</th><th>% of items</th>' +
+      '</tr></thead><tbody id="si-breakdown-body"></tbody></table></div>' +
       '<div class="si-grp" style="margin-top:14px">Delivery timing per school ' +
       '<span class="si-qsel">View: ' +
       [0,1,2,3,4].map(function(q){return '<button class="si-qbtn'+(q===0?' on':'')+'" data-vq="'+q+'">'+(q?'Q'+q:'Year')+'</button>';}).join('') +
@@ -376,7 +431,7 @@
     return m[k] || k;
   }
 
-  function renderAll() { renderRatios(); renderPrices(); renderTable(); wireQBtns(); }
+  function renderAll() { renderRatios(); renderPrices(); renderBreakdown(); renderTable(); wireQBtns(); }
   window.takmilRenderItems = renderAll;
 
   function wireQBtns() {
@@ -401,6 +456,8 @@
       '.si-qsel{font-size:11px;font-weight:400;color:var(--text3);display:flex;gap:4px;align-items:center}' +
       '.si-qbtn{background:var(--bg3);border:.5px solid var(--border2);color:var(--text2);border-radius:5px;padding:2px 9px;font-size:11px;cursor:pointer}' +
       '.si-qbtn.on{background:var(--accent);color:#fff;border-color:var(--accent)}' +
+      '.si-bqbtn{background:var(--bg3);border:.5px solid var(--border2);color:var(--text2);border-radius:5px;padding:2px 9px;font-size:11px;cursor:pointer}' +
+      '.si-bqbtn.on{background:var(--accent);color:#fff;border-color:var(--accent)}' +
       '.si-ptbl{border-collapse:collapse;font-size:11px;margin-top:6px}' +
       '.si-ptbl th,.si-ptbl td{border:.5px solid var(--border);padding:3px 6px;text-align:center}' +
       '.si-ptbl th{background:var(--bg3);color:var(--text2);font-size:10px}' +
