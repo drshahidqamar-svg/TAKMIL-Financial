@@ -26,21 +26,22 @@
 (function () {
 
   var ITEMS = [
-    { k: 'Books',                  basis: 'ratio',      ratioDefault: 2,  mode: 'one-time' },
-    { k: 'Chromebooks',            basis: 'ratio',      ratioDefault: 5,  mode: 'one-time' },
-    { k: 'Solar Panels',           basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'Laptops',                basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'USB Drives',             basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'Learning Mats',          basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'Lesson Planners',        basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'Projectors',             basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'Whiteboards',            basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'School Banners',         basis: 'perSchool',  per: 1,           mode: 'one-time' },
-    { k: 'Internet Allowance',     basis: 'perSchool',  per: 1,           mode: 'recurring' },
-    { k: 'School Bags',            basis: 'perStudent',                   mode: 'one-time' },
-    { k: 'Stationery Kits',        basis: 'perStudent',                   mode: 'one-time' },
-    { k: 'Assessment Photocopies', basis: 'perStudent',                   mode: 'recurring' }
+    { k: 'Books',                  basis: 'ratio',      ratioDefault: 2,  freq: 'annual'  },
+    { k: 'Chromebooks',            basis: 'perSchool',  per: 5,           freq: 'annual'  },
+    { k: 'Solar Panels',           basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'Laptops',                basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'USB Drives',             basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'Learning Mats',          basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'Lesson Planners',        basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'Projectors',             basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'Whiteboards',            basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'School Banners',         basis: 'perSchool',  per: 1,           freq: 'annual'  },
+    { k: 'School Bags',            basis: 'perStudent',                   freq: 'annual'  },
+    { k: 'Internet Allowance',     basis: 'perSchool',  per: 1,           freq: 'monthly' },
+    { k: 'Stationery Kits',        basis: 'perStudent',                   freq: 'monthly' },
+    { k: 'Assessment Photocopies', basis: 'perStudent',                   freq: 'monthly' }
   ];
+  var MONTHS_PER_QUARTER = 3;
   var BY_KEY = {}; ITEMS.forEach(function (i) { BY_KEY[i.k] = i; });
   window.TAKMIL_ITEMS = ITEMS;
 
@@ -62,16 +63,17 @@
     var d = D();
     if (!d.itemCfg) d.itemCfg = {};
     var c = d.itemCfg;
-    if (!c.ratios) c.ratios = { 'Books': 2, 'Chromebooks': 5 };
-    if (!c.prices) c.prices = {};
-    if (!c.modes)  c.modes  = {};
+    if (!c.ratios) c.ratios = { 'Books': 2 };
+    if (c.ratios['Books'] == null) c.ratios['Books'] = 2;
     if (!c.perCounts) c.perCounts = {};
+    if (!c.prices) c.prices = {};
+    if (!c.freq)   c.freq   = {};
     ITEMS.forEach(function (it) {
       if (!Array.isArray(c.prices[it.k])) {
         var p = DEFAULT_PRICE[it.k] || 0;
         c.prices[it.k] = [p, p, p, p];
       }
-      if (!c.modes[it.k]) c.modes[it.k] = it.mode || 'one-time';
+      if (!c.freq[it.k]) c.freq[it.k] = it.freq || 'annual';
       if (it.basis === 'perSchool' && c.perCounts[it.k] == null) c.perCounts[it.k] = it.per || 1;
     });
     return c;
@@ -94,20 +96,23 @@
   }
   window.takmilItemFlags = qFlags;
 
-  // cost of one item at one school, for a specific quarter (1-4) or all (0)
+  // cost of one item at one school, for a specific quarter (1-4) or full year (0)
   function itemCostQ(school, key, quarter) {
     var c = cfg();
     var prices = c.prices[key] || [0, 0, 0, 0];
-    var mode = c.modes[key] || 'one-time';
+    var freq = c.freq[key] || 'annual';
     var f = qFlags(school, key);
     var qty = qtyFor(school, key);
     if (!qty) return 0;
 
-    if (mode === 'recurring') {
-      if (quarter) return f[quarter - 1] ? qty * (+prices[quarter - 1] || 0) : 0;
-      return [0, 1, 2, 3].reduce(function (a, i) { return a + (f[i] ? qty * (+prices[i] || 0) : 0); }, 0);
+    if (freq === 'monthly') {
+      // charged every ticked quarter, at 3 months × that quarter's price
+      if (quarter) return f[quarter - 1] ? qty * (+prices[quarter - 1] || 0) * MONTHS_PER_QUARTER : 0;
+      return [0, 1, 2, 3].reduce(function (a, i) {
+        return a + (f[i] ? qty * (+prices[i] || 0) * MONTHS_PER_QUARTER : 0);
+      }, 0);
     }
-    // one-time: charged only in the FIRST ticked quarter
+    // annual: charged ONCE, in the first ticked (delivery) quarter
     var first = -1;
     for (var i = 0; i < 4; i++) { if (f[i]) { first = i; break; } }
     if (first < 0) return 0;
@@ -179,7 +184,7 @@
       '<div class="si-grp">Quantity rules</div><div id="si-ratios" class="si-ratios"></div>' +
       '<details style="margin-top:10px"><summary class="si-sum">Unit prices by quarter, charging mode &amp; per-school counts</summary>' +
       '<div style="overflow-x:auto"><table class="si-ptbl"><thead><tr>' +
-      '<th style="text-align:left">Item</th><th>Quantity rule</th><th>Charging</th>' +
+      '<th style="text-align:left">Item</th><th>Quantity rule</th><th>Frequency</th>' +
       '<th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th>' +
       '</tr></thead><tbody id="si-prices"></tbody></table></div></details>' +
       '<div class="si-grp" style="margin-top:14px">Delivery timing per school ' +
@@ -188,7 +193,7 @@
       '</span></div>' +
       '<div style="overflow-x:auto"><table class="si-table"><thead id="si-head"></thead><tbody id="si-body"></tbody></table></div>' +
       '<p class="si-note">Tick the quarter(s) each school receives an item. Quantities come from the rules above and update with student numbers. ' +
-      'One-time items are charged in the first ticked quarter; recurring items are charged in every ticked quarter.</p>' +
+      'Once/year items are charged once in the delivery quarter you tick. Monthly items (stationery, assessment, internet) are charged 3 months × price for every ticked quarter.</p>' +
       '</div></div>';
   }
 
@@ -220,9 +225,9 @@
         : it.basis === 'perStudent'
           ? '<td style="font-size:10px;color:var(--text3)">1 per student</td>'
           : '<td><input type="number" min="0" step="1" style="width:52px" value="' + (c.perCounts[it.k] || 1) + '" data-percount="' + it.k + '"> per school</td>';
-      var modeCell = '<td><select data-mode="' + it.k + '">' +
-        ['one-time', 'recurring'].map(function (m) {
-          return '<option value="' + m + '"' + (c.modes[it.k] === m ? ' selected' : '') + '>' + m + '</option>';
+      var modeCell = '<td><select data-freq="' + it.k + '">' +
+        [['annual', 'once/year'], ['monthly', 'monthly ×3/qtr']].map(function (m) {
+          return '<option value="' + m[0] + '"' + (c.freq[it.k] === m[0] ? ' selected' : '') + '>' + m[1] + '</option>';
         }).join('') + '</select></td>';
       var priceCells = [0, 1, 2, 3].map(function (qi) {
         return '<td><input type="number" min="0" step="1" value="' + Math.round(toDisp(p[qi] || 0)) +
@@ -235,8 +240,8 @@
     document.querySelectorAll('[data-price]').forEach(function (inp) {
       inp.onchange = function () { cfg().prices[inp.dataset.price][+inp.dataset.q] = fromDisp(+inp.value || 0); renderTable(); save(); };
     });
-    document.querySelectorAll('[data-mode]').forEach(function (sel) {
-      sel.onchange = function () { cfg().modes[sel.dataset.mode] = sel.value; renderTable(); save(); };
+    document.querySelectorAll('[data-freq]').forEach(function (sel) {
+      sel.onchange = function () { cfg().freq[sel.dataset.freq] = sel.value; renderTable(); save(); };
     });
     document.querySelectorAll('[data-percount]').forEach(function (inp) {
       inp.onchange = function () { cfg().perCounts[inp.dataset.percount] = +inp.value || 1; renderAll(); save(); };
