@@ -258,7 +258,7 @@
         '<div class="si-set-ratios si-ratios" id="si-set-ratios"></div>' +
         '<div style="overflow-x:auto;margin-top:8px"><table class="si-ptbl" style="width:100%"><thead><tr>' +
         '<th style="text-align:left">Item</th><th>Quantity rule</th><th>Frequency</th>' +
-        '<th>Q1 price</th><th>Q2 price</th><th>Q3 price</th><th>Q4 price</th>' +
+        '<th>Unit price</th><th>Q1 price</th><th>Q2 price</th><th>Q3 price</th><th>Q4 price</th>' +
         '</tr></thead><tbody id="si-set-prices"></tbody></table></div>' +
         '<p class="si-note">Once/year items are charged once in the delivery quarter ticked per school. ' +
         'Monthly items (stationery, assessment, internet) charge 3 months \u00d7 price for each ticked quarter. ' +
@@ -286,10 +286,22 @@
         return '<td><input type="number" min="0" step="1" value="' + Math.round(toDisp(p[qi] || 0)) +
           '" data-sprice="' + it.k + '" data-q="' + qi + '" style="width:80px"></td>';
       }).join('');
-      return '<tr><td style="text-align:left">' + it.k + '</td>' + ruleCell + freqCell + priceCells + '</tr>';
+      // Unit price: shows the common value if all quarters equal, else blank.
+      var allEqual = p[0] === p[1] && p[1] === p[2] && p[2] === p[3];
+      var unitVal = allEqual ? Math.round(toDisp(p[0] || 0)) : '';
+      var unitCell = '<td><input type="number" min="0" step="1" value="' + unitVal +
+        '" placeholder="\u2013" data-sunit="' + it.k + '" style="width:80px;font-weight:600"></td>';
+      return '<tr><td style="text-align:left">' + it.k + '</td>' + ruleCell + freqCell + unitCell + priceCells + '</tr>';
     }).join('');
     var body = document.getElementById('si-set-prices'); if (body) body.innerHTML = rows;
 
+    anchor.querySelectorAll('[data-sunit]').forEach(function (inp) {
+      inp.onchange = function () {
+        var usd = fromDisp(+inp.value || 0);
+        cfg().prices[inp.dataset.sunit] = [usd, usd, usd, usd]; // fill all four quarters
+        refreshEverything();
+      };
+    });
     anchor.querySelectorAll('[data-sprice]').forEach(function (inp) {
       inp.onchange = function () { cfg().prices[inp.dataset.sprice][+inp.dataset.q] = fromDisp(+inp.value || 0); refreshEverything(); };
     });
