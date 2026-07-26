@@ -35,6 +35,11 @@ router.use(requireAuth);
 // ── Load ──
 router.get('/', async (req, res) => {
   const ws = await getWorkspace();
+  // Lightweight freshness check — returns only revision metadata, not the
+  // (potentially large) document. Used by clients to detect stale tabs.
+  if (req.query.meta) {
+    return res.json({ rev: ws.rev, updated_at: ws.updated_at, updated_by: ws.updated_by });
+  }
   res.json({
     doc: ws.doc || {},                 // JSONB already comes back as an object
     rev: ws.rev,

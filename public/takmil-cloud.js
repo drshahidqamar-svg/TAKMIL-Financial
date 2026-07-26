@@ -14,6 +14,7 @@
   const API = '/api';
   let SESSION = null;          // { id, email, name, role, initials }
   let CURRENT_REV = 0;         // server revision we last loaded/saved
+  let LAST_SEEN_REV = 0;       // highest revision this tab knows about (freshness check)
   let CLOUD_READY = false;
 
   // ── tiny fetch helper (cookie-based auth) ──
@@ -70,7 +71,7 @@
     btn.disabled = true; btn.textContent = 'Signing in…';
     try {
       const r = await api('/auth/login', { method: 'POST', body: { email, password } });
-      SESSION = r.user;
+      SESSION = r.user; window.SESSION = SESSION;
       document.getElementById('tk-login')?.remove();
       document.body.style.overflow = '';
       await startCloud();
@@ -94,6 +95,7 @@
       payload = { doc: {}, rev: 0, canWrite: SESSION.role !== 'viewer' };
     }
     CURRENT_REV = payload.rev || 0;
+    LAST_SEEN_REV = CURRENT_REV;
 
     const hasDoc = payload.doc && Object.keys(payload.doc).length > 0;
     if (hasDoc && typeof window.restoreD === 'function') {
@@ -102,7 +104,7 @@
       // Seed the cloud with the current default model once.
       try {
         const r = await api('/model', { method: 'PUT', body: { doc: window.serializeD(), baseRev: 0 } });
-        CURRENT_REV = r.rev;
+        CURRENT_REV = r.rev; LAST_SEEN_REV = r.rev;
       } catch {}
     }
 
@@ -111,7 +113,31 @@
     refreshAppUI();
     injectUserUI();
     applyRolePermissions();
+    startFreshnessCheck();
   }
+
+  // Periodically check whether another user/tab has saved a newer version.
+  // If so, warn this tab that it's stale — preventing an idle session from
+  // later overwriting newer data with an old revision.
+  let _freshTimer = null, _staleWarned = false;
+  function startFreshnessCheck() {
+    if (_freshTimer) clearInterval(_freshTimer);
+    _freshTimer = setInterval(async function () {
+      if (!CLOUD_READY || document.hidden) return; // skip when tab not visible
+      try {
+        const meta = await api('/model?meta=1').catch(function () { return null; });
+        const rev = meta && (meta.rev != null ? meta.rev : (meta.revision != null ? meta.revision : null));
+        if (rev == null) return;
+        if (rev > CURRENT_REV && !_staleWarned) {
+          _staleWarned = true;
+          setIndicator('conflict');
+          if (typeof window.showPersistToast === 'function')
+            window.showPersistToast('⚠ Someone else updated the data. Click Save-area ↻ or reload to get the latest before editing.', true);
+        }
+      } catch (e) {}
+    }, 20000); // every 20s
+  }
+
 
   // Replace the global save/load functions the app defined.
   function overridePersistence() {
@@ -130,9 +156,21 @@
         })
         .catch(err => {
           if (err.status === 409) {
+            // Someone else (or another tab) saved a newer version. Do NOT let
+            // this stale session overwrite it. Pull the latest and tell the user.
             setIndicator('conflict');
             if (typeof window.showPersistToast === 'function')
-              window.showPersistToast('⚠ Someone else saved — reload to merge', true);
+              window.showPersistToast('⚠ Your data was out of date — reloading the latest so you don\'t overwrite newer changes.', true);
+            // fetch latest revision so this tab is no longer stale
+            api('/model').then(p => {
+              CURRENT_REV = p.rev || 0;
+              LAST_SEEN_REV = CURRENT_REV;
+              if (typeof window.restoreD === 'function') window.restoreD(p.doc);
+              refreshAppUI();
+              setIndicator('saved');
+              if (typeof window.showPersistToast === 'function')
+                window.showPersistToast('↻ Loaded the latest version. Re-apply your change and save again.', true);
+            }).catch(function () {});
           } else {
             setIndicator('error');
             if (typeof window.showPersistToast === 'function') window.showPersistToast('⚠ Cloud save failed', true);
@@ -387,7 +425,7 @@
     injectStyles();
     try {
       const r = await api('/auth/me');
-      SESSION = r.user;
+      SESSION = r.user; window.SESSION = SESSION;
       await startCloud();
     } catch {
       showLogin();
