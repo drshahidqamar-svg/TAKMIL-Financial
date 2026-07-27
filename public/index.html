@@ -382,7 +382,7 @@ canvas{display:block}
 <aside class="sidebar">
   <div class="nav-section">Overview</div>
   <div class="nav-item active" data-page="dashboard"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
-  <div class="nav-item" data-page="forecast"><i class="ti ti-chart-line"></i>Forecasting</div>
+  <div class="nav-item" data-page="forecast" style="display:none"><i class="ti ti-chart-line"></i>Forecasting</div>
   <div class="nav-item" data-page="insights"><i class="ti ti-bulb"></i>Insights <span class="nav-badge nb-amber" id="ins-badge">4</span></div>
 
   <div class="nav-section">Edit data</div>
@@ -391,7 +391,7 @@ canvas{display:block}
   <div class="nav-item" data-page="supply" style="display:none"><i class="ti ti-solar-panel"></i>Infrastructure <span class="nav-badge nb-amber" id="badge-sup">14</span></div>
   <div class="nav-item" data-page="schools"><i class="ti ti-building"></i>Schools <span class="nav-badge nb-green" id="badge-sch">150</span></div>
   <div class="nav-item" data-page="quarterly"><i class="ti ti-calendar-stats"></i>Quarterly status</div>
-  <div class="nav-item" data-page="assumptions"><i class="ti ti-adjustments-horizontal"></i>Assumptions</div>
+  <div class="nav-item" data-page="assumptions" style="display:none"><i class="ti ti-adjustments-horizontal"></i>Assumptions</div>
 
   <div class="nav-section">History</div>
   <div class="nav-item" data-page="versions"><i class="ti ti-git-branch"></i>Versions</div>
@@ -4052,13 +4052,13 @@ try{ window.totCost=totCost; window.cpc=cpc; window.fieldAnn=fieldAnn; window.hq
 <script src="takmil-cloud.js"></script>
 <!-- ════ TAKMIL bulk CSV import (schools / HR / supply) ════ -->
 <script src="takmil-import.js"></script>
-<!-- ════ TAKMIL cost-per-child simulation page ════ -->
-<script src="takmil-sim.js"></script>
+<!-- ════ TAKMIL cost-per-child simulation page (disabled) ════ -->
+<!-- <script src="takmil-sim.js"></script> -->
 <!-- ════ TAKMIL per-school items & costs ════ -->
 <script src="takmil-schoolitems.js"></script>
 <!-- ════ TAKMIL R1: overheads, projects & software with region tags ════ -->
 <script src="takmil-costs.js"></script>
-<!-- ════ TAKMIL projection (what-if cost per child) ════ -->
-<script src="takmil-projection.js"></script>
+<!-- ════ TAKMIL projection (what-if cost per child) (disabled) ════ -->
+<!-- <script src="takmil-projection.js"></script> -->
 </body>
 </html>
