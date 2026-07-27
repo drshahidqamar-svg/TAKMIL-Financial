@@ -534,6 +534,8 @@ canvas{display:block}
     <div class="card-body" id="budget-split-bars" style="padding:12px 14px"></div>
     <!-- North America cost summary -->
     <div id="na-summary" style="padding:0 14px 14px"></div>
+    <!-- R3: cost-per-child breakdown (X + NA + Data/LMS) -->
+    <div id="cpc-breakdown" style="padding:0 14px 14px"></div>
     <!-- hidden canvas kept for compat -->
     <canvas id="donut-chart" style="display:none"></canvas>
     <div id="donut-legend" style="display:none"></div>
@@ -2209,6 +2211,72 @@ function naStaffAnnual(h){
 }
 function activeMonths(h){ return 12; }
 
+/* ── R3: Cost-per-child breakdown ──
+   Total cost/child = X + NA + Data/LMS, where:
+     NA       = North America dept staff salaries + NA-region cost items
+     Data/LMS = Data & LMS dept staff salaries + Data/LMS-tagged cost items
+                (Pakistan region only — NA-tagged items count in NA, no double count)
+     X        = everything else
+   The three pieces add up exactly to the total. */
+function renderCpcBreakdown(totalBudget){
+  const box = el('cpc-breakdown');
+  if(!box) return;
+  const students = activeStudentCount() || D.students || 0;
+  if(students<=0){ box.innerHTML=''; return; }
+
+  const staffAnnualByDept = depts => (D.hrList||[])
+    .filter(h => depts.includes(h.d))
+    .reduce((a,h)=>a+naStaffAnnual(h),0);
+
+  // NA = NA dept staff + NA-region cost items
+  const naStaff = staffAnnualByDept(['North America']);
+  const naCosts = (typeof window.takmilCostsNA==='function') ? window.takmilCostsNA() : 0;
+  const naTotal = naStaff + naCosts;
+
+  // Data/LMS = Data & LMS dept staff + Pakistan-region Data/LMS cost items
+  const dlStaff = staffAnnualByDept(['Data','LMS']);
+  const dlCosts = (typeof window.takmilCostsDataLMS_pk==='function') ? window.takmilCostsDataLMS_pk() : 0;
+  const dataLMS = dlStaff + dlCosts;
+
+  // X = the rest
+  const xTotal = Math.max(0, totalBudget - naTotal - dataLMS);
+
+  const perChild = v => v/students;
+  const pct = v => totalBudget>0 ? (v/totalBudget*100) : 0;
+
+  const rows = [
+    { n:'X — all other costs', v:xTotal,   c:'#10b981' },
+    { n:'North America',        v:naTotal,  c:'#3b82f6' },
+    { n:'Data / LMS',           v:dataLMS,  c:'#8b5cf6' },
+  ];
+
+  box.innerHTML = `
+    <div style="border-top:.5px solid var(--border2);padding-top:12px;margin-top:2px">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Cost / child breakdown</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">
+        Total ${f$(perChild(totalBudget))}/child = X + North America + Data/LMS
+      </div>
+      <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:12px">
+        ${rows.map(r=>`<div title="${r.n}: ${fp(pct(r.v))}" style="flex:${Math.max(r.v,0.001)};background:${r.c};height:100%"></div>`).join('')}
+      </div>
+      ${rows.map(r=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:2px;background:${r.c};flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--text)">${r.n}</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center">
+            <span style="font-size:12px;font-weight:600;color:${r.c}">${f$(perChild(r.v))}/child</span>
+            <span style="font-size:11px;color:var(--text2);min-width:42px;text-align:right">${fp(pct(r.v))}</span>
+          </div>
+        </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;border-top:.5px solid var(--border2);margin-top:6px;padding-top:8px">
+        <span style="font-size:12px;font-weight:700;color:var(--text)">Total</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent)">${f$(perChild(totalBudget))}/child</span>
+      </div>
+    </div>`;
+}
+
 function updateKPIs(){
   const tc=totCost(), hqa=hqAnn(), fa=fieldAnn(), sup=supAll(), ov=overhead();
   const cpv=cpc();
@@ -2422,6 +2490,8 @@ function renderDashboard(){
   }
   /* ── North America cost summary (under Budget split) ── */
   renderNASummary(tc);
+  /* ── R3: cost-per-child breakdown (X + NA + Data/LMS) ── */
+  renderCpcBreakdown(tc);
   /* ── Salary bars: field staff 3 rows + live HR dept breakdown ── */
   const sc=D.schools;
   const teacherAnn  = sc * D.teacherMon * 12;
