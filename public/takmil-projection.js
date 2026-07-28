@@ -1,322 +1,293 @@
 // ════════════════════════════════════════════════════════════════
-// takmil-projection.js — "Projection" page.
+// takmil-projection.js — Projection page (rebuilt).
 //
-// Starts from the LIVE current model (real schools, students, costs)
-// and lets you stack what-if changes, showing the new cost per child
-// per year instantly, side by side with the current figure:
-//   • Add schools (adds schools + their students + teacher/coord cost)
-//   • Add staff in any category (teachers via schools, coordinators,
-//     regional, provincial, HR) — count × salary
-//   • Salary increment — global % and/or per-category %
-//   • Add supply items — quantity × unit cost, one-off or recurring
+// TWO tools, both read-only (never change real data):
+// 1) FORWARD: "add N students" → treated as new schools (N ÷ avg/school).
+//    Cascades teachers/coordinators/regional/provincial + items + overhead
+//    (scaled proportionally), shows new total cost & cost/child vs current.
+// 2) REVERSE: "what setup hits target/child?" → target students/school +
+//    ranked levers.
 //
-// It never changes the real model. Reads baseline via the app's own
-// cost functions so the starting cost/child matches the dashboard.
+// Baseline read live from the app's own functions so it matches dashboard.
 // ════════════════════════════════════════════════════════════════
 (function () {
   function D() { return window.D; }
   var rnd = function (x) { return Math.round(x); };
-  var money = function (usd) { return (typeof window.f$ === 'function') ? window.f$(usd) : '$' + rnd(usd).toLocaleString(); };
+  var money = function (u) { return (typeof window.f$ === 'function') ? window.f$(u) : '$' + rnd(u).toLocaleString(); };
+  function callNum(fn, a) { try { return typeof window[fn] === 'function' ? (window[fn](a) || 0) : 0; } catch (e) { return 0; } }
 
-  // ── read the live baseline from the app's own functions ──
   function baseline() {
     var d = D();
-    var students = (typeof window.activeStudentCount === 'function') ? window.activeStudentCount() : (d.students || 0);
-    if (!students) students = d.students || 0;
-    var schools = (typeof window.activeSchoolCount === 'function') ? window.activeSchoolCount() : (d.schools || (d.schoolsList ? d.schoolsList.length : 0));
-    if (!schools) schools = d.schools || 0;
-
-    var field = safe(window.fieldAnn, schools);   // teachers + FC + RC
-    var hq = safe(window.hqAnn);                   // HR / head office
-    var sup = safe(window.supTotal) || safe(window.supAll, schools);
-    var overhead = safe(window.overhead);
+    var schools = callNum('activeSchoolCount') || (d.schoolsList ? d.schoolsList.length : 0) || d.schools || 0;
+    var students = callNum('activeStudentCount') || d.students || 0;
+    var field = callNum('fieldAnn', schools);
+    var hq = callNum('hqAnn');
+    var sup = callNum('supTotal');
+    var overhead = callNum('overhead');
     var training = d.training || 0;
-    var total = safe(window.totCost, schools) || (field + hq + sup + overhead + training);
-    // per-school items cost (from the school-items module) if present
-    var itemsCost = (typeof window.takmilTotalItemCost === 'function') ? window.takmilTotalItemCost() : 0;
+    var total = field + hq + sup + overhead + training;
+    var avgPer = schools > 0 ? students / schools : 30;
+
+    var teachers = schools;
+    var coords = rnd(schools / 10);
+    var regional = rnd(coords / 4);
+    var provincial = rnd(regional / 5);
+    var area = rnd(regional / 8);
+    var program = rnd(area / 4);
+
+    var teacherMon = d.teacherMon || 150, fcoordMon = d.fcoordMon || 300, rcoordMon = d.rcoordMon || 500, provMon = d.provMon || 700;
+    var areaMon = d.areaMon || 900, pmMon = d.pmMon || 1200;
+
+    var perSchoolItemCost = 0;
+    try {
+      if (window.TAKMIL_ITEMS && typeof window.takmilAnnualPerSchool === 'function') {
+        window.TAKMIL_ITEMS.forEach(function (it) { perSchoolItemCost += (window.takmilAnnualPerSchool(it.k) || 0); });
+      }
+    } catch (e) {}
 
     return {
-      students: students, schools: schools,
+      schools: schools, students: students, avgPer: avgPer,
       field: field, hq: hq, sup: sup, overhead: overhead, training: training,
-      items: itemsCost, total: total + itemsCost,
-      cpc: students > 0 ? (total + itemsCost) / students : 0,
-      // unit rates for layering
-      teacherMon: d.teacherMon || 150, fcoordMon: d.fcoordMon || 300, rcoordMon: d.rcoordMon || 500,
-      avgPerSchool: schools > 0 ? Math.round(students / schools) : 30,
-    };
-  }
-  function safe(fn, a) { try { return typeof fn === 'function' ? (fn(a) || 0) : 0; } catch (e) { return 0; } }
-
-  // current what-if inputs
-  function inputs() {
-    var g = function (id) { var e = document.getElementById(id); var n = e ? parseFloat(e.value) : 0; return isNaN(n) ? 0 : n; };
-    return {
-      addSchools: g('pj-addSchools'), avgPer: g('pj-avgPer'),
-      addTeachers: g('pj-addTeachers'), addCoord: g('pj-addCoord'),
-      addReg: g('pj-addReg'), addProv: g('pj-addProv'), addHR: g('pj-addHR'),
-      salTeacher: g('pj-salTeacher'), salCoord: g('pj-salCoord'), salReg: g('pj-salReg'),
-      salHR: g('pj-salHR'), salGlobal: g('pj-salGlobal'),
-      addStudents: g('pj-addStudents'),
-      itemQty: g('pj-itemQty'), itemCost: g('pj-itemCost'),
-      provMon: g('pj-provMon'), hrMon: g('pj-hrMon'), coordMon: g('pj-coordMon'), regMon: g('pj-regMon'), teachMon: g('pj-teachMon'),
+      total: total, cpc: students > 0 ? total / students : 0,
+      teachers: teachers, coords: coords, regional: regional, provincial: provincial, area: area, program: program,
+      teacherMon: teacherMon, fcoordMon: fcoordMon, rcoordMon: rcoordMon, provMon: provMon, areaMon: areaMon, pmMon: pmMon,
+      perSchoolItemCost: perSchoolItemCost,
     };
   }
 
-  function project() {
+  function project(addStudents, opts) {
     var b = baseline();
-    var i = inputs();
+    opts = opts || {};
+    var avgPer = Math.max(1, opts.avgPer || b.avgPer);
+    var newSchools = Math.max(0, Math.round(addStudents / avgPer));
+    var newStudents = newSchools * Math.round(avgPer);
+    var totStudents = b.students + newStudents;
+    var totSchools = b.schools + newSchools;
 
-    // ---- students ----
-    var newSchoolStudents = i.addSchools * (i.avgPer || b.avgPerSchool);
-    var students = b.students + newSchoolStudents + i.addStudents;
+    var newTeachers = totSchools;
+    var newCoords = rnd(totSchools / 10);
+    var newRegional = rnd(newCoords / 4);
+    var newProvincial = rnd(newRegional / 5);
+    var newArea = rnd(newRegional / 8);
+    var newProgram = rnd(newArea / 4);
 
-    // ---- salary increments (percent) applied to existing field + HQ ----
-    var gT = (1 + i.salGlobal / 100) * (1 + i.salTeacher / 100);
-    var gC = (1 + i.salGlobal / 100) * (1 + i.salCoord / 100);
-    var gR = (1 + i.salGlobal / 100) * (1 + i.salReg / 100);
-    var gH = (1 + i.salGlobal / 100) * (1 + i.salHR / 100);
+    var addTeachers = newTeachers - b.teachers;
+    var addCoords = newCoords - b.coords;
+    var addRegional = newRegional - b.regional;
+    var addProvincial = newProvincial - b.provincial;
+    var addArea = newArea - b.area;
+    var addProgram = newProgram - b.program;
 
-    // Baseline field cost splits are not individually exposed, so apply the
-    // teacher increment to the whole field block as an approximation unless
-    // per-category salaries are known. We scale field by a blend and HQ by gH.
-    // Better: rebuild field from unit rates for the increment portion.
-    // Existing field cost scaled: teachers dominate field, so use gT for the
-    // teacher share and gC/gR for coordinator shares derived from counts.
-    var curSchools = b.schools;
-    var curCoord = Math.round(curSchools / 10);
-    var curReg = Math.round(curCoord / 4);
-    var curProv = Math.round(curReg / 5);
-    var curTeacherCost = curSchools * b.teacherMon * 12;
-    var curCoordCost = curCoord * b.fcoordMon * 12;
-    var curRegCost = curReg * b.rcoordMon * 12;
-    // recompute a clean field baseline from unit rates (keeps increments exact)
-    var fieldBaseClean = curTeacherCost + curCoordCost + curRegCost;
-    // if the app's fieldAnn differs (per-school overrides etc.), keep its extra as a fixed remainder
-    var fieldRemainder = b.field - fieldBaseClean;
+    var addTeacherCost = addTeachers * b.teacherMon * 12;
+    var addCoordCost = addCoords * b.fcoordMon * 12;
+    var addRegCost = addRegional * b.rcoordMon * 12;
+    var addProvCost = addProvincial * b.provMon * 12;
+    var addAreaCost = addArea * b.areaMon * 12;
+    var addProgramCost = addProgram * b.pmMon * 12;
+    var addItemCost = newSchools * b.perSchoolItemCost;
 
-    // ---- new staff added ----
-    var addTeacherCost = (i.addSchools + i.addTeachers) * (i.teachMon || b.teacherMon) * 12;
-    // schools also pull coordinators automatically via cascade:
-    var cascadeCoord = Math.round((curSchools + i.addSchools) / 10) - curCoord;
-    var cascadeReg = Math.round(Math.round((curSchools + i.addSchools) / 10) / 4) - curReg;
-    var cascadeProv = Math.round(Math.round(Math.round((curSchools + i.addSchools) / 10) / 4) / 5) - curProv;
+    var newOverhead = b.students > 0 ? b.overhead * (totStudents / b.students) : b.overhead;
+    var addOverhead = newOverhead - b.overhead;
 
-    var totalNewCoord = i.addCoord + Math.max(0, cascadeCoord);
-    var totalNewReg = i.addReg + Math.max(0, cascadeReg);
-    var totalNewProv = i.addProv + Math.max(0, cascadeProv);
-
-    var addCoordCost = totalNewCoord * (i.coordMon || b.fcoordMon) * 12;
-    var addRegCost = totalNewReg * (i.regMon || b.rcoordMon) * 12;
-    var addProvCost = totalNewProv * (i.provMon || 700) * 12;
-    var addHRCost = i.addHR * (i.hrMon || 400) * 12;
-
-    // ---- assemble new field & HQ with increments ----
-    var newTeacherCost = (curTeacherCost * gT) + addTeacherCost;
-    var newCoordCost = (curCoordCost * gC) + addCoordCost;
-    var newRegCost = (curRegCost * gR) + addRegCost;
-    var newField = newTeacherCost + newCoordCost + newRegCost + fieldRemainder + addProvCost;
-    var newHQ = (b.hq * gH) + addHRCost;
-
-    // ---- items ----
-    var addItemsCost = i.itemQty * i.itemCost;
-
-    // ---- supply/overhead/training carry over; new schools scale supply per school ----
-    var supPerSchool = curSchools > 0 ? b.sup / curSchools : 0;
-    var newSup = b.sup + supPerSchool * i.addSchools;
-
-    var newTotal = newField + newHQ + newSup + b.overhead + b.training + b.items + addItemsCost;
-    var newCpc = students > 0 ? newTotal / students : 0;
+    var addTotal = addTeacherCost + addCoordCost + addRegCost + addProvCost + addAreaCost + addProgramCost + addItemCost + addOverhead;
+    var newTotal = b.total + addTotal;
+    var newCpc = totStudents > 0 ? newTotal / totStudents : 0;
 
     return {
-      b: b, students: students,
-      total: newTotal, cpc: newCpc,
-      newSchools: curSchools + i.addSchools,
-      newCoord: curCoord + totalNewCoord, newReg: curReg + totalNewReg, newProv: curProv + totalNewProv,
-      newHRcount: null,
-      parts: {
-        field: newField, hq: newHQ, sup: newSup,
-        overhead: b.overhead, training: b.training, items: b.items + addItemsCost,
-      },
-      addStudents: newSchoolStudents + i.addStudents,
+      b: b, newSchools: newSchools, newStudents: newStudents, totStudents: totStudents, totSchools: totSchools,
+      addTeachers: addTeachers, addCoords: addCoords, addRegional: addRegional, addProvincial: addProvincial,
+      addArea: addArea, addProgram: addProgram,
+      addTeacherCost: addTeacherCost, addCoordCost: addCoordCost, addRegCost: addRegCost, addProvCost: addProvCost,
+      addAreaCost: addAreaCost, addProgramCost: addProgramCost,
+      addItemCost: addItemCost, addOverhead: addOverhead, addTotal: addTotal, newTotal: newTotal, newCpc: newCpc,
     };
   }
 
-  function render() {
-    if (!document.getElementById('pj-addSchools')) return;
-    var r = project(); var b = r.b;
-    var set = function (id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
-
-    set('pj-base-cpc', money(b.cpc));
-    set('pj-base-students', b.students.toLocaleString());
-    set('pj-base-total', money(b.total));
-    set('pj-base-schools', b.schools.toLocaleString());
-
-    set('pj-new-cpc', money(r.cpc));
-    set('pj-new-students', r.students.toLocaleString());
-    set('pj-new-total', money(r.total));
-    set('pj-new-schools', r.newSchools.toLocaleString());
-
-    // delta
-    var d = r.cpc - b.cpc;
-    var dEl = document.getElementById('pj-delta');
-    if (dEl) {
-      var up = d > 0.5, dn = d < -0.5;
-      dEl.textContent = (up ? '▲ +' : dn ? '▼ ' : '≈ ') + money(Math.abs(d)) + ' / child';
-      dEl.style.color = up ? 'var(--red,#ef4444)' : dn ? 'var(--accent,#10b981)' : 'var(--text2)';
-    }
-    // target check
-    var tgt = D().target || 100;
-    var tEl = document.getElementById('pj-target');
-    if (tEl) {
-      var ok = r.cpc <= tgt;
-      tEl.innerHTML = ok
-        ? '<span style="color:var(--accent,#10b981)"><i class="ti ti-circle-check"></i> Within $' + tgt + ' target (' + money(tgt - r.cpc) + ' headroom)</span>'
-        : '<span style="color:var(--red,#ef4444)"><i class="ti ti-alert-triangle"></i> ' + money(r.cpc - tgt) + ' over the $' + tgt + ' target</span>';
-    }
-
-    // breakdown bars
-    var parts = [
-      { l: 'Field (teachers + coords)', v: r.parts.field, c: '#10b981' },
-      { l: 'HR & head office', v: r.parts.hq, c: '#f59e0b' },
-      { l: 'Supply', v: r.parts.sup, c: '#f97316' },
-      { l: 'Per-school items', v: r.parts.items, c: '#8b5cf6' },
-      { l: 'Overhead', v: r.parts.overhead, c: '#64748b' },
-      { l: 'Training', v: r.parts.training, c: '#3b82f6' },
-    ];
-    var max = Math.max.apply(null, parts.map(function (x) { return x.v; })) || 1;
-    var bd = document.getElementById('pj-breakdown');
-    if (bd) bd.innerHTML = parts.map(function (x) {
-      return '<div class="pj-bd"><div class="pj-bd-l">' + x.l + '</div>' +
-        '<div class="pj-bd-w"><div class="pj-bd-bar" style="width:' + (x.v / max * 100) + '%;background:' + x.c + '"></div></div>' +
-        '<div class="pj-bd-v">' + money(x.v) + '</div></div>';
-    }).join('');
-
-    set('pj-cascade', 'After changes: ' + r.newSchools.toLocaleString() + ' schools · ' +
-      r.newCoord + ' coordinators · ' + r.newReg + ' regional · ' + r.newProv + ' provincial · +' +
-      rnd(r.addStudents).toLocaleString() + ' students');
+  function cpcAtAvg(b, avg) {
+    var schools = Math.max(1, Math.round(b.students / avg));
+    var coords = rnd(schools / 10), regional = rnd(coords / 4), provincial = rnd(regional / 5);
+    var area = rnd(regional / 8), program = rnd(area / 4);
+    var fieldCost = schools * b.teacherMon * 12 + coords * b.fcoordMon * 12 + regional * b.rcoordMon * 12
+      + provincial * b.provMon * 12 + area * b.areaMon * 12 + program * b.pmMon * 12;
+    var itemCost = schools * b.perSchoolItemCost;
+    var total = fieldCost + itemCost + b.hq + b.overhead + b.training;
+    return { cpc: b.students > 0 ? total / b.students : 0, schools: schools };
   }
 
-  function num(id, label, val, hint) {
-    return '<label class="pj-f"><span>' + label + '</span>' +
-      '<input type="number" id="' + id + '" value="' + val + '" step="1">' +
-      (hint ? '<em>' + hint + '</em>' : '') + '</label>';
+  function solveForTarget(target) {
+    var b = baseline();
+    var best = null;
+    for (var avg = Math.round(b.avgPer); avg <= 80; avg++) {
+      var r = cpcAtAvg(b, avg);
+      if (r.cpc <= target) { best = { avg: avg, schools: r.schools, cpc: r.cpc }; break; }
+    }
+    return { b: b, target: target, result: best };
+  }
+
+  function rankLevers() {
+    var b = baseline();
+    var baseCpc = b.cpc;
+    function cpcWith(mods) {
+      var avgPer = mods.avgPer || b.avgPer;
+      var teacherMon = mods.teacherMon != null ? mods.teacherMon : b.teacherMon;
+      var schools = Math.max(1, Math.round(b.students / avgPer));
+      var coords = rnd(schools / 10), regional = rnd(coords / 4), provincial = rnd(regional / 5);
+      var area = rnd(regional / 8), program = rnd(area / 4);
+      var fieldCost = schools * teacherMon * 12 + coords * b.fcoordMon * 12 + regional * b.rcoordMon * 12
+        + provincial * b.provMon * 12 + area * b.areaMon * 12 + program * b.pmMon * 12;
+      var itemCost = schools * b.perSchoolItemCost;
+      var total = fieldCost + itemCost + b.hq + b.overhead + b.training;
+      return b.students > 0 ? total / b.students : 0;
+    }
+    var levers = [
+      { name: 'Increase students/school by 5 (to ' + Math.round(b.avgPer + 5) + ')', save: baseCpc - cpcWith({ avgPer: b.avgPer + 5 }) },
+      { name: 'Increase students/school by 10 (to ' + Math.round(b.avgPer + 10) + ')', save: baseCpc - cpcWith({ avgPer: b.avgPer + 10 }) },
+      { name: 'Reduce teacher salary 10%', save: baseCpc - cpcWith({ teacherMon: b.teacherMon * 0.9 }) },
+    ];
+    return levers.filter(function (l) { return l.save > 0.01; }).sort(function (a, c) { return c.save - a.save; });
+  }
+
+  function el(id) { return document.getElementById(id); }
+  function v(id) { var e = el(id); var n = e ? parseFloat(e.value) : 0; return isNaN(n) ? 0 : n; }
+
+  function kpi(label, val) {
+    return '<div class="pj-kpi"><div class="pj-kpi-l">' + label + '</div><div class="pj-kpi-v">' + (typeof val === 'number' ? val.toLocaleString() : val) + '</div></div>';
+  }
+  function needCard(n, label) {
+    return '<div class="pj-need-card"><div class="pj-need-n">+' + (n || 0).toLocaleString() + '</div><div class="pj-need-l">' + label + '</div></div>';
+  }
+  function costLine(label, val) {
+    return '<div class="pj-cost-line"><span>' + label + '</span><span>' + money(val) + '</span></div>';
   }
 
   function buildPage() {
     var b = baseline();
     return '' +
-    '<div class="page-head"><div><h1 class="page-title">Projection — What-if cost per child</h1>' +
-    '<p class="page-sub">Starts from your live current figures. Add schools, staff, salary increases, or items and see the new cost per child per year instantly. Nothing here changes your real model.</p></div>' +
-    '<button class="c-btn" onclick="takmilProjReset()"><i class="ti ti-refresh"></i> Reset changes</button></div>' +
-
-    // before / after
-    '<div class="pj-compare">' +
-    '<div class="pj-side"><div class="pj-side-h">Current (live)</div>' +
-    '<div class="pj-big" id="pj-base-cpc"></div><div class="pj-side-sub">per child / year</div>' +
-    '<div class="pj-side-meta"><span id="pj-base-students"></span> students · <span id="pj-base-schools"></span> schools · <span id="pj-base-total"></span></div></div>' +
-    '<div class="pj-arrow"><div id="pj-delta" class="pj-delta"></div><i class="ti ti-arrow-right" style="font-size:22px;color:var(--text3)"></i></div>' +
-    '<div class="pj-side pj-side-new"><div class="pj-side-h">Projected</div>' +
-    '<div class="pj-big" id="pj-new-cpc"></div><div class="pj-side-sub">per child / year</div>' +
-    '<div class="pj-side-meta"><span id="pj-new-students"></span> students · <span id="pj-new-schools"></span> schools · <span id="pj-new-total"></span></div></div>' +
-    '</div>' +
-
-    '<div id="pj-target" style="text-align:center;font-size:13px;font-weight:600;margin:10px 0 4px"></div>' +
-    '<div id="pj-cascade" style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px"></div>' +
-
-    // change controls
-    '<div class="card"><div class="card-header"><div class="card-title"><i class="ti ti-plus"></i>Add / change</div></div><div class="card-body">' +
-
-    '<div class="pj-grp">Add schools</div><div class="pj-grid">' +
-    num('pj-addSchools', 'Number of new schools', 0) +
-    num('pj-avgPer', 'Students per new school', b.avgPerSchool, 'adds students + teacher + coordinator cascade') +
-    '</div>' +
-
-    '<div class="pj-grp">Add students only (no new schools)</div><div class="pj-grid">' +
-    num('pj-addStudents', 'Extra students', 0, 'into existing schools') +
-    '</div>' +
-
-    '<div class="pj-grp">Add staff</div><div class="pj-grid">' +
-    num('pj-addTeachers', 'Extra teachers', 0) +
-    num('pj-teachMon', 'Teacher salary / mo', b.teacherMon) +
-    num('pj-addCoord', 'Extra coordinators', 0) +
-    num('pj-coordMon', 'Coordinator salary / mo', b.fcoordMon) +
-    num('pj-addReg', 'Extra regional coords', 0) +
-    num('pj-regMon', 'Regional salary / mo', b.rcoordMon) +
-    num('pj-addProv', 'Extra provincial coords', 0) +
-    num('pj-provMon', 'Provincial salary / mo', 700) +
-    num('pj-addHR', 'Extra HR / staff', 0) +
-    num('pj-hrMon', 'HR salary / mo', 400) +
-    '</div>' +
-
-    '<div class="pj-grp">Salary increment (%)</div><div class="pj-grid">' +
-    num('pj-salGlobal', 'All salaries +%', 0, 'applies on top of per-category') +
-    num('pj-salTeacher', 'Teachers +%', 0) +
-    num('pj-salCoord', 'Coordinators +%', 0) +
-    num('pj-salReg', 'Regional +%', 0) +
-    num('pj-salHR', 'HR / staff +%', 0) +
-    '</div>' +
-
-    '<div class="pj-grp">Add an item (one-off)</div><div class="pj-grid">' +
-    num('pj-itemQty', 'Quantity', 0) +
-    num('pj-itemCost', 'Unit cost ($)', 0) +
-    '</div>' +
-
-    '</div></div>' +
-
-    '<div class="card" style="margin-top:14px"><div class="card-header"><div class="card-title"><i class="ti ti-chart-bar"></i>Projected annual cost breakdown</div></div>' +
-    '<div class="card-body" id="pj-breakdown"></div></div>';
+    '<div class="page-head"><div><h1 class="page-title">Projection</h1>' +
+    '<p class="page-sub">See what it takes to grow, and what setup reaches your target. Read-only — nothing here changes your live data.</p></div></div>' +
+    '<div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title"><i class="ti ti-photo"></i>Current setup (live)</div></div>' +
+    '<div class="card-body"><div class="pj-kpis">' +
+    kpi('Schools', b.schools) + kpi('Students', b.students) + kpi('Avg/school', Math.round(b.avgPer)) +
+    kpi('Cost/child', money(b.cpc)) + kpi('Total budget', money(b.total)) +
+    '</div></div></div>' +
+    '<div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title"><i class="ti ti-trending-up"></i>If we grow…</div></div>' +
+    '<div class="card-body"><div class="pj-controls">' +
+    '<label class="pj-f"><span>Add students</span><input type="number" id="pj-add" value="500" min="0" step="50"></label>' +
+    '<label class="pj-f"><span>As new schools of (students each)</span><input type="number" id="pj-avg" value="' + Math.round(b.avgPer) + '" min="1"></label>' +
+    '</div><div id="pj-forward"></div></div></div>' +
+    '<div class="card"><div class="card-header"><div class="card-title"><i class="ti ti-target"></i>To reach a target cost/child</div></div>' +
+    '<div class="card-body"><div class="pj-controls">' +
+    '<label class="pj-f"><span>Target cost/child ($)</span><input type="number" id="pj-target" value="100" min="1"></label>' +
+    '</div><div id="pj-reverse"></div></div></div>';
   }
 
-  window.takmilProjReset = function () {
-    var page = document.getElementById('page-projection');
-    if (page) { page.innerHTML = buildPage(); wire(); render(); }
-  };
+  function renderForward() {
+    var host = el('pj-forward'); if (!host) return;
+    var r = project(rnd(v('pj-add')), { avgPer: rnd(v('pj-avg')) });
+    var b = r.b;
+    var target = D().target || 100;
+    var pass = r.newCpc <= target;
+    host.innerHTML =
+      '<div class="pj-before-after">' +
+      '<div class="pj-ba-col"><div class="pj-ba-h">Now</div><div class="pj-ba-big">' + money(b.cpc) + '</div>' +
+      '<div class="pj-ba-sub">' + b.students.toLocaleString() + ' students · ' + b.schools + ' schools</div></div>' +
+      '<div class="pj-ba-arrow"><i class="ti ti-arrow-right"></i></div>' +
+      '<div class="pj-ba-col pj-ba-new"><div class="pj-ba-h">After adding ' + r.newStudents.toLocaleString() + ' students</div>' +
+      '<div class="pj-ba-big">' + money(r.newCpc) + '</div><div class="pj-ba-sub">' + r.totStudents.toLocaleString() + ' students · ' + r.totSchools + ' schools</div></div></div>' +
+      '<div class="pj-need-title">What you\u2019d need to add</div><div class="pj-need-grid">' +
+      needCard(r.newSchools, 'New schools') + needCard(r.addTeachers, 'Teachers') + needCard(r.addCoords, 'Coordinators') +
+      needCard(r.addRegional, 'Regional coords') + needCard(r.addProvincial, 'Provincial coords') +
+      needCard(r.addArea, 'Area Managers') + needCard(r.addProgram, 'Program Managers') + '</div>' +
+      '<div class="pj-cost-lines">' +
+      costLine('Teacher salaries', r.addTeacherCost) + costLine('Coordinator salaries', r.addCoordCost) +
+      costLine('Regional coordinators', r.addRegCost) + costLine('Provincial coordinators', r.addProvCost) +
+      costLine('Area Managers', r.addAreaCost) + costLine('Program Managers', r.addProgramCost) +
+      costLine('Items & technology', r.addItemCost) + costLine('Overhead (scaled)', r.addOverhead) +
+      '<div class="pj-cost-total"><span>Extra annual cost</span><span>' + money(r.addTotal) + '</span></div></div>' +
+      '<div class="pj-verdict ' + (pass ? 'ok' : 'over') + '">' +
+      (pass ? '\u2713 New cost/child ' + money(r.newCpc) + ' is within your ' + money(target) + ' target'
+            : '\u26a0 New cost/child ' + money(r.newCpc) + ' is above your ' + money(target) + ' target') + '</div>';
+  }
 
+  function renderReverse() {
+    var host = el('pj-reverse'); if (!host) return;
+    var target = v('pj-target') || 100;
+    var s = solveForTarget(target);
+    var b = s.b;
+    var html = '';
+    if (s.result) {
+      html += '<div class="pj-verdict ok" style="margin-bottom:12px">To reach ' + money(target) +
+        '/child, run about <b>' + s.result.avg + ' students per school</b> (around <b>' + s.result.schools +
+        ' schools</b> for your ' + b.students.toLocaleString() + ' students). Projected: <b>' + money(s.result.cpc) + '/child</b>.</div>';
+    } else {
+      html += '<div class="pj-verdict over" style="margin-bottom:12px">Target ' + money(target) +
+        '/child isn\u2019t reachable by class size alone (even at 80/school). You\u2019d also need to cut salaries, item costs, or overhead \u2014 see levers.</div>';
+    }
+    var levers = rankLevers();
+    html += '<div class="pj-need-title">Biggest levers (cost/child saved)</div><div class="pj-levers">';
+    if (levers.length) levers.forEach(function (l) {
+      html += '<div class="pj-lever"><span>' + l.name + '</span><span class="pj-lever-save">\u2212' + money(l.save) + '/child</span></div>';
+    }); else html += '<div style="font-size:12px;color:var(--text3)">No single lever changes cost/child much at current settings.</div>';
+    html += '</div>';
+    html += '<div class="pj-need-title" style="margin-top:12px">Cost/child at different class sizes</div><div class="pj-curve">';
+    var sizes = [Math.round(b.avgPer), Math.round(b.avgPer) + 5, Math.round(b.avgPer) + 10, Math.round(b.avgPer) + 15, 40, 50]
+      .filter(function (x, i, arr) { return arr.indexOf(x) === i && x > 0; }).sort(function (a, c) { return a - c; });
+    sizes.forEach(function (avg) {
+      var r = cpcAtAvg(b, avg);
+      var hit = r.cpc <= target;
+      html += '<div class="pj-curve-row"><span>' + avg + '/school</span><span style="color:' + (hit ? 'var(--accent,#10b981)' : 'var(--text2)') + '">' + money(r.cpc) + '/child</span></div>';
+    });
+    html += '</div>';
+    host.innerHTML = html;
+  }
+
+  function renderAll() { renderForward(); renderReverse(); }
   function wire() {
-    var ids = ['pj-addSchools', 'pj-avgPer', 'pj-addStudents', 'pj-addTeachers', 'pj-teachMon',
-      'pj-addCoord', 'pj-coordMon', 'pj-addReg', 'pj-regMon', 'pj-addProv', 'pj-provMon',
-      'pj-addHR', 'pj-hrMon', 'pj-salGlobal', 'pj-salTeacher', 'pj-salCoord', 'pj-salReg', 'pj-salHR',
-      'pj-itemQty', 'pj-itemCost'];
-    ids.forEach(function (id) { var e = document.getElementById(id); if (e) e.addEventListener('input', render); });
+    ['pj-add', 'pj-avg'].forEach(function (id) { var e = el(id); if (e) e.addEventListener('input', renderForward); });
+    var t = el('pj-target'); if (t) t.addEventListener('input', renderReverse);
   }
 
   function injectStyles() {
     var s = document.createElement('style');
     s.textContent =
-      '.pj-compare{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:6px}' +
-      '.pj-side{background:var(--bg3);border-radius:12px;padding:16px;text-align:center}' +
-      '.pj-side-new{background:rgba(16,185,129,.08);border:.5px solid rgba(16,185,129,.25)}' +
-      '.pj-side-h{font-size:12px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}' +
-      '.pj-big{font-size:34px;font-weight:600;color:var(--text)}' +
-      '.pj-side-sub{font-size:11px;color:var(--text3)}' +
-      '.pj-side-meta{font-size:11px;color:var(--text2);margin-top:8px}' +
-      '.pj-arrow{display:flex;flex-direction:column;align-items:center;gap:6px}' +
-      '.pj-delta{font-size:12px;font-weight:600;white-space:nowrap}' +
-      '.pj-grp{font-size:12px;font-weight:600;color:var(--accent);margin:14px 0 8px}' +
-      '.pj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px 12px;margin-bottom:4px}' +
+      '.pj-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}' +
+      '.pj-kpi{background:var(--bg3);border-radius:8px;padding:10px 12px}' +
+      '.pj-kpi-l{font-size:11px;color:var(--text3)}.pj-kpi-v{font-size:18px;font-weight:600;color:var(--text)}' +
+      '.pj-controls{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}' +
       '.pj-f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--text2)}' +
-      '.pj-f input{width:100%}.pj-f em{font-size:10px;color:var(--text3);font-style:normal}' +
-      '.pj-bd{display:flex;align-items:center;gap:10px;margin-bottom:6px}' +
-      '.pj-bd-l{font-size:12px;width:170px;flex-shrink:0;color:var(--text2)}' +
-      '.pj-bd-w{flex:1;background:var(--bg3);border-radius:4px;height:18px;overflow:hidden}' +
-      '.pj-bd-bar{height:100%;border-radius:4px}' +
-      '.pj-bd-v{font-size:12px;width:100px;text-align:right;flex-shrink:0;color:var(--text)}' +
-      '@media(max-width:700px){.pj-compare{grid-template-columns:1fr}.pj-arrow{flex-direction:row;justify-content:center}}';
+      '.pj-f input{width:180px;background:var(--bg3);border:.5px solid var(--border2);border-radius:6px;padding:6px 8px;color:var(--text)}' +
+      '.pj-before-after{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:16px}' +
+      '.pj-ba-col{background:var(--bg3);border-radius:10px;padding:14px;text-align:center}' +
+      '.pj-ba-new{background:rgba(16,185,129,.08);border:.5px solid rgba(16,185,129,.25)}' +
+      '.pj-ba-h{font-size:11px;color:var(--text3);margin-bottom:6px}' +
+      '.pj-ba-big{font-size:26px;font-weight:700;color:var(--text)}' +
+      '.pj-ba-sub{font-size:11px;color:var(--text2);margin-top:4px}.pj-ba-arrow{color:var(--text3);font-size:20px}' +
+      '.pj-need-title{font-size:12px;font-weight:600;color:var(--accent);margin:14px 0 8px}' +
+      '.pj-need-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:12px}' +
+      '.pj-need-card{background:var(--bg3);border-radius:8px;padding:10px;text-align:center}' +
+      '.pj-need-n{font-size:20px;font-weight:700;color:var(--text)}.pj-need-l{font-size:10px;color:var(--text2)}' +
+      '.pj-cost-lines{margin:8px 0}' +
+      '.pj-cost-line{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);padding:4px 0}' +
+      '.pj-cost-total{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--text);border-top:.5px solid var(--border2);padding-top:8px;margin-top:4px}' +
+      '.pj-verdict{border-radius:8px;padding:10px 12px;font-size:12px;margin-top:12px}' +
+      '.pj-verdict.ok{background:rgba(16,185,129,.1);color:var(--accent,#10b981)}' +
+      '.pj-verdict.over{background:rgba(239,68,68,.1);color:#ef4444}' +
+      '.pj-levers,.pj-curve{display:flex;flex-direction:column;gap:5px}' +
+      '.pj-lever,.pj-curve-row{display:flex;justify-content:space-between;font-size:12px;background:var(--bg3);border-radius:6px;padding:6px 10px;color:var(--text2)}' +
+      '.pj-lever-save{color:var(--accent,#10b981);font-weight:600}';
     document.head.appendChild(s);
   }
 
   function injectNav() {
-    var simNav = document.querySelector('.nav-item[data-page="simulation"]');
-    var anchorNav = simNav || document.querySelector('.nav-item[data-page="insights"]') || document.querySelector('.nav-item[data-page="forecast"]');
+    var anchorNav = document.querySelector('.nav-item[data-page="insights"]') || document.querySelector('.nav-item[data-page="dashboard"]');
     if (!anchorNav || document.querySelector('.nav-item[data-page="projection"]')) return;
-
     var item = document.createElement('div');
     item.className = 'nav-item';
     item.setAttribute('data-page', 'projection');
     item.innerHTML = '<i class="ti ti-trending-up"></i>Projection';
     anchorNav.parentNode.insertBefore(item, anchorNav.nextSibling);
 
-    var anchorPage = document.getElementById('page-simulation') || document.getElementById('page-insights') || document.getElementById('page-dashboard');
+    var anchorPage = document.getElementById('page-insights') || document.getElementById('page-dashboard');
     var page = document.createElement('div');
     page.id = 'page-projection';
     page.style.display = 'none';
@@ -325,14 +296,13 @@
 
     item.addEventListener('click', function () {
       if (typeof window.showPage === 'function') { try { window.showPage('projection'); } catch (e) {} }
-      wire(); render();
+      page.innerHTML = buildPage(); wire(); renderAll();
     });
-
     if (typeof window.showPage === 'function' && !window.showPage.__projWrapped) {
       var orig = window.showPage;
       window.showPage = function (pg) {
         var out = orig.apply(this, arguments);
-        if (pg === 'projection') { wire(); render(); }
+        if (pg === 'projection') { page.innerHTML = buildPage(); wire(); renderAll(); }
         return out;
       };
       window.showPage.__projWrapped = true;
@@ -340,13 +310,13 @@
   }
 
   function boot() {
-    var tries = 0;
+    var t = 0;
     var iv = setInterval(function () {
-      tries++;
+      t++;
       if (window.D && typeof window.cpc === 'function' && document.querySelector('.nav-item[data-page]') && !document.querySelector('.nav-item[data-page="projection"]')) {
         injectStyles(); injectNav(); clearInterval(iv);
       }
-      if (tries > 80) clearInterval(iv);
+      if (t > 80) clearInterval(iv);
     }, 500);
   }
 
