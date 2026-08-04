@@ -523,7 +523,7 @@ canvas{display:block}
       <div class="div"></div>
       <div style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text3)">
         <div style="width:16px;height:2px;background:var(--accent)"></div>
-        <span style="color:var(--accent);font-weight:500">$100 target = $460K for 4,600 students</span>
+        <span style="color:var(--accent);font-weight:500" id="wf-target-note">$100 target for active students</span>
         <span>· current over by <span style="color:var(--red);font-weight:600" id="over-amt">$807K</span></span>
       </div>
     </div>
@@ -2333,10 +2333,15 @@ function updateKPIs(){
   }
   if(el('k-cpc-vs')) el('k-cpc-vs').textContent=over?'+'+f$(cpv-D.target):'-'+f$(Math.round(D.target-cpv));
   if(el('k-cpc-vs')) el('k-cpc-vs').style.color=over?'var(--red)':'var(--accent)';
-  /* total budget bar: target as % of actual budget */
-  const targetBudget=D.target*D.students;
+  /* total budget bar: target as % of actual budget.
+     FIX: use the LIVE student count (sum across schools), not the stale D.students. */
+  const actStu = activeStudentCount();
+  const targetBudget=D.target*actStu;
   const tcNow=totCost();
   if(el('k-target-budget'))el('k-target-budget').textContent=f$(targetBudget);
+  /* keep the waterfall caption in sync with the real numbers */
+  if(el('wf-target-note')) el('wf-target-note').textContent =
+    `${f$(D.target)} target = ${f$(targetBudget)} for ${actStu.toLocaleString()} students`;
   if(el('k-total-bar')){
     el('k-total-bar').style.width=Math.min(targetBudget/tcNow*100,100).toFixed(1)+'%';
     el('k-total-bar').style.background='var(--amber)';
@@ -2448,7 +2453,7 @@ function renderDashboard(){
     </div>`;
   }).join('');
 
-  el('over-amt').textContent=f$(tc-D.target*D.students);
+  el('over-amt').textContent=f$(tc-D.target*activeStudentCount());
   el('gauge-fill').style.width=Math.min(cpv/D.target/4*100,100)+'%';
   el('gauge-fill').style.background=cpv>D.target?'var(--red)':'var(--accent)';
 
