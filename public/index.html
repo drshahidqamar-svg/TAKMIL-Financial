@@ -756,8 +756,9 @@ canvas{display:block}
   </div>
   <div class="ps-tsdiv"></div>
   <div class="ps-target-block">
-    <label>Training budget ($)</label>
-    <input type="number" id="s-training" value="8000" min="0" oninput="recalc()" style="color:var(--text)">
+    <label>Training / teacher / yr</label>
+    <input type="number" id="s-training-pt" value="40000" min="0" oninput="recalc()" style="color:var(--text)">
+    <div style="font-size:10px;color:var(--text3);margin-top:3px" id="s-training-note">× teachers = total training</div>
   </div>
   <div class="ps-tsdiv"></div>
   <div class="ps-live-box">
@@ -1462,7 +1463,7 @@ let _unsaved   = false;
 function serializeD() {
   return {
     schools:D.schools,students:D.students,schCoord:D.schCoord,coordRC:D.coordRC,
-    target:D.target,training:D.training,overhead:Object.assign({},D.overhead),naOverhead:D.naOverhead||0,
+    target:D.target,training:D.training,trainingPerTeacher:D.trainingPerTeacher||0,overhead:Object.assign({},D.overhead),naOverhead:D.naOverhead||0,
     teacherMon:D.teacherMon,fcoordMon:D.fcoordMon,rcoordMon:D.rcoordMon,nextId:D.nextId,
     hrList:   D.hrList.map(h=>Object.assign({},h)),
     supply:   D.supply.map(i=>Object.assign({},i)),
@@ -1487,7 +1488,7 @@ function serializeD() {
 }
 
 function restoreD(saved) {
-  ['schools','students','schCoord','coordRC','target','training','teacherMon',
+  ['schools','students','schCoord','coordRC','target','training','trainingPerTeacher','teacherMon',
    'fcoordMon','rcoordMon','nextId'].forEach(k=>{if(saved[k]!==undefined)D[k]=saved[k];});
   if(saved.overhead)   Object.assign(D.overhead,saved.overhead);
   if(saved.naOverhead!==undefined) D.naOverhead=saved.naOverhead;
@@ -1581,7 +1582,7 @@ function importBackup(){
         if(el('s-schools'))el('s-schools').value=D.schools;
         if(el('s-students'))el('s-students').value=D.students;
         if(el('s-target')){el('s-target').value=D.target; if(el('s-target-visible'))el('s-target-visible').value=D.target;}
-        if(el('s-training'))el('s-training').value=D.training;
+        if(el('s-training-pt'))el('s-training-pt').value=Math.round(toDisplay(D.trainingPerTeacher||0));
         if(el('cur-rate-input'))el('cur-rate-input').value=CUR.rate;
         setCurrency(CUR.mode);
         renderDashboard();updateKPIs();updateHRCalcs();updateSupplyCalcs();
@@ -1677,7 +1678,7 @@ function refreshMoneyInputs(){
   const unit = CUR.mode==='pkr' ? 'Rs.' : '$';
   const put = (id, usd) => { const e=el(id); if(e) e.value = Math.round(toDisplay(usd)); };
   put('s-target', D.target);
-  put('s-training', D.training);
+  put('s-training-pt', D.trainingPerTeacher||0);
   ['rent','fuel','comms','print','audit','it','bank','field','misc']
     .forEach(k=>{ if(D.overhead[k]!==undefined) put('o-'+k, D.overhead[k]); });
   if(D.naOverhead!==undefined) put('o-naoh', D.naOverhead);
@@ -1693,7 +1694,7 @@ function refreshMoneyInputs(){
 }
 
 const D={
-  schools:150,students:4600,schCoord:10,coordRC:4,target:100,training:8000,
+  schools:150,students:4600,schCoord:10,coordRC:4,target:100,training:8000,trainingPerTeacher:142.857,
   overhead:{rent:18000,fuel:12000,comms:6000,print:4000,audit:5000,it:4000,bank:1500,field:6000,misc:10725},
   teacherMon:150,fcoordMon:300,rcoordMon:500,
   hrList:[
@@ -2126,7 +2127,16 @@ function recalc(){
   D.coordRC=+(el('s-coordrc')?.value)||4;
   /* Money inputs are typed in the ACTIVE display currency; store as USD. */
   D.target=fromDisplay(+el('s-target').value)||100;
-  D.training=fromDisplay(+el('s-training').value)||0;
+  /* #7: Training = per-teacher rate × number of teachers (1 teacher per school). */
+  if(el('s-training-pt')){
+    D.trainingPerTeacher = fromDisplay(+el('s-training-pt').value)||0;
+    const nTeachers = activeSchoolCount();
+    D.training = D.trainingPerTeacher * nTeachers;
+    const note = el('s-training-note');
+    if(note) note.textContent = '× ' + nTeachers + ' teachers = ' + f$(D.training);
+  } else {
+    D.training=fromDisplay(+el('s-training')?.value)||D.training||0;
+  }
   /* R1: when the cost-items module is active it owns overhead & NA overhead.
      Let it re-mirror its totals; skip the legacy input reads (those fields are hidden). */
   if(typeof window.takmilSyncCosts==='function'){
@@ -3897,7 +3907,7 @@ if (_loaded) {
   if(el('s-schools'))   el('s-schools').value   = D.schools;
   if(el('s-students'))  el('s-students').value  = D.students;
   if(el('s-target'))    el('s-target').value     = D.target;
-  if(el('s-training'))  el('s-training').value   = D.training;
+  if(el('s-training-pt'))el('s-training-pt').value = Math.round(toDisplay(D.trainingPerTeacher||0));
   if(el('s-bookratio')) el('s-bookratio').value  = 2;
   ['rent','fuel','comms','print','audit','it','bank','field','misc'].forEach(k=>{
     const e=el('o-'+k); if(e&&D.overhead[k]!==undefined) e.value=D.overhead[k];
