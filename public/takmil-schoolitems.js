@@ -280,13 +280,7 @@
       '<div class="card-header"><div class="card-title"><i class="ti ti-package"></i>Items, timing &amp; costs</div>' +
       '<div class="card-actions"><span id="si-grand" style="font-size:12px;color:var(--text2)"></span></div></div>' +
       '<div class="card-body">' +
-      '<div class="si-grp">Quantity rules</div><div id="si-ratios" class="si-ratios"></div>' +
-      '<details style="margin-top:10px"><summary class="si-sum">Unit prices by quarter, charging mode &amp; per-school counts</summary>' +
-      '<div style="overflow-x:auto"><table class="si-ptbl"><thead><tr>' +
-      '<th style="text-align:left">Item</th><th>Quantity rule</th><th>Frequency</th>' +
-      '<th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th>' +
-      '</tr></thead><tbody id="si-prices"></tbody></table></div></details>' +
-      '<div class="si-grp" style="margin-top:14px">Cost breakdown by item ' +
+      '<div class="si-grp" style="margin-top:2px">Cost breakdown by item ' +
       '<span class="si-qsel">View: ' +
       [0,1,2,3,4].map(function(q){return '<button class="si-bqbtn'+(q===0?' on':'')+'" data-bq="'+q+'">'+(q?'Q'+q:'Year')+'</button>';}).join('') +
       '</span></div>' +
@@ -489,7 +483,7 @@
     return m[k] || k;
   }
 
-  function renderAll() { renderRatios(); renderPrices(); renderBreakdown(); renderTable(); wireQBtns(); }
+  function renderAll() { renderBreakdown(); renderTable(); wireQBtns(); }
   window.takmilRenderItems = renderAll;
 
   function wireQBtns() {

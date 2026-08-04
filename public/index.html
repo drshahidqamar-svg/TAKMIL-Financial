@@ -429,14 +429,6 @@ canvas{display:block}
         <div style="font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.8px;line-height:1" id="k-sps-v">30.7</div>
       </div>
     </div>
-    <div style="margin-top:14px;padding-top:10px;border-top:.5px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px">
-        <span>Schools progress</span><span id="k-schools-pct" style="color:var(--accent)">75%</span>
-      </div>
-      <div style="height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden">
-        <div id="k-schools-bar" style="height:100%;background:var(--accent);border-radius:2px;transition:width .4s;width:75%"></div>
-      </div>
-    </div>
   </div>
 
   <!-- Col 2: Cost per Child -->
@@ -553,8 +545,8 @@ canvas{display:block}
     <div class="card-header"><div class="card-title"><i class="ti ti-package"></i>Supply items</div><div class="card-actions"><button class="c-btn" onclick="showPage('supply')">Edit →</button></div></div>
     <div class="card-body"><div id="sup-bars"></div></div>
   </div>
-  <!-- Target gauge + actions -->
-  <div class="card">
+  <!-- Target gauge + actions — removed (superseded by Projection page) -->
+  <div class="card" style="display:none">
     <div class="card-header"><div class="card-title"><i class="ti ti-target"></i>Path to $100/child</div></div>
     <div class="card-body">
       <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Current vs target</div>
@@ -666,9 +658,20 @@ canvas{display:block}
 
 <div class="ps-notice"><i class="ti ti-info-circle" style="margin-right:6px"></i>Changing any value here recalculates all quantities, totals, percentages and cost-per-child across every budget head automatically.</div>
 
-<!-- ── Core programme drivers (Row 1: 4 cards) ── -->
-<div class="ps-section">Core programme drivers</div>
-<div class="ps-driver-grid">
+<!-- ── Target (the one driver still used) ── -->
+<div class="ps-section">Programme target</div>
+<div class="ps-driver-grid" style="grid-template-columns:repeat(4,1fr)">
+  <div class="ps-driver-card">
+    <div class="ps-driver-lbl">Target $/child / yr</div>
+    <input type="number" id="s-target-visible" value="100" min="1" oninput="document.getElementById('s-target').value=this.value; recalc();">
+    <div class="ps-underline"></div>
+    <div class="ps-driver-hint">Policy target for cost per child</div>
+  </div>
+</div>
+
+<!-- ── Core programme drivers (hidden — superseded by per-school data) ── -->
+<div class="ps-section" style="display:none">Core programme drivers</div>
+<div class="ps-driver-grid" style="display:none">
   <div class="ps-driver-card">
     <div class="ps-driver-lbl">Total schools</div>
     <input type="number" id="s-schools" value="150" min="1" oninput="syncSettings()">
@@ -696,7 +699,7 @@ canvas{display:block}
 </div>
 
 <!-- ── Row 2: 4 more cards ── -->
-<div class="ps-driver-grid">
+<div class="ps-driver-grid" style="display:none">
   <div class="ps-driver-card">
     <div class="ps-driver-lbl">Assessments per year</div>
     <input type="number" id="s-assessments" value="12" min="1" oninput="syncSettings()">
@@ -1221,7 +1224,6 @@ canvas{display:block}
         <button class="filter-chip" data-qv="q2" onclick="setSchoolQView('q2',this)">Q2</button>
         <button class="filter-chip" data-qv="q3" onclick="setSchoolQView('q3',this)">Q3</button>
         <button class="filter-chip" data-qv="q4" onclick="setSchoolQView('q4',this)">Q4</button>
-        <button class="filter-chip" data-qv="infra" onclick="setSchoolQView('infra',this)" title="Per-school infrastructure activation"><i class="ti ti-solar-panel" style="font-size:12px"></i> Infra</button>
       </div>
     </div>
   </div>
@@ -1586,7 +1588,7 @@ function importBackup(){
         saveToStorage(false);
         if(el('s-schools'))el('s-schools').value=D.schools;
         if(el('s-students'))el('s-students').value=D.students;
-        if(el('s-target'))el('s-target').value=D.target;
+        if(el('s-target')){el('s-target').value=D.target; if(el('s-target-visible'))el('s-target-visible').value=D.target;}
         if(el('s-training'))el('s-training').value=D.training;
         if(el('cur-rate-input'))el('cur-rate-input').value=CUR.rate;
         setCurrency(CUR.mode);
