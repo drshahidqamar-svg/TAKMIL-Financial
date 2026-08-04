@@ -174,7 +174,7 @@ button{cursor:pointer;font-family:inherit;font-size:12px;border:none;outline:non
 .wf-lbl-sub{font-size:10px;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
 .wf-center{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 14px;gap:5px}
 .wf-bar-row{display:flex;align-items:center;gap:8px}
-.wf-track{flex:1;height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.wf-track{flex:1;height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;white-space:nowrap;font-size:0}
 .wf-bar{height:100%;border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1)}
 .wf-bar-label{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;min-width:38px}
 .wf-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:3px;width:80px;flex-shrink:0;padding-left:12px;border-left:.5px solid var(--border)}
@@ -508,7 +508,7 @@ canvas{display:block}
   <!-- Waterfall -->
   <div class="card">
     <div class="card-header">
-      <div class="card-title"><i class="ti ti-chart-bar-off"></i>Budget waterfall — every head as % of total</div>
+      <div class="card-title"><i class="ti ti-chart-bar-off"></i>Budget waterfall — how the total builds up</div>
     </div>
     <div class="card-body">
       <div id="waterfall"></div>
@@ -2031,13 +2031,16 @@ function setExchangeRate(rate){
   CUR.rate=r;
   if(el('cur-rate-input'))el('cur-rate-input').value=r;
   if(el('cur-label'))el('cur-label').textContent=CUR.mode==='pkr'?`Rs. · 1$=Rs.${r}`:'USD · $';
+  if(el('cur-rate-display'))el('cur-rate-display').textContent=r.toLocaleString();
   updateConvRate();
-  /* always re-render — even in USD mode the converter ref values change */
+  refreshMoneyInputs();          // restate input boxes at the new rate
+  /* always re-render — even in USD mode the Rs. reference values change */
   updateKPIs();
   renderDashboard();
   if(currentPage==='hr')renderHR();
   if(currentPage==='supply')renderSupply();
   updateConvBenchmarks();
+  scheduleSave();
 }
 
 /* ── Page routing ── */
@@ -2436,27 +2439,46 @@ function renderDashboard(){
     ...wfData,
     {l:'Overhead', v:ov, c:'#64748b', pct:ov/tc*100, dim:true},
   ];
-  el('waterfall').innerHTML=allWfRows.map(r=>{
-    const sub=wfSubs[r.l]||'';
-    const barW=Math.max(r.pct,0).toFixed(1);
-    const opacity=r.dim?'opacity:.55;':'';
-    return `<div class="wf-row" style="${opacity}">
-      <div class="wf-lbl-wrap">
-        <div class="wf-lbl" style="color:${r.c}">${r.l}</div>
-        ${sub?`<div class="wf-lbl-sub">${sub}</div>`:''}
-      </div>
-      <div class="wf-center">
-        <div class="wf-bar-row">
-          <div class="wf-track"><div class="wf-bar" style="width:${barW}%;background:${r.c}"></div></div>
-          <span class="wf-bar-label">${r.pct.toFixed(1)}%</span>
-        </div>
-      </div>
-      <div class="wf-right">
-        <div class="wf-amt">${fK(r.v)}</div>
-        <div class="wf-pct-badge" style="background:${r.c}22;color:${r.c}">${fp(r.v/D.students)}/child</div>
-      </div>
-    </div>`;
-  }).join('');
+  el('waterfall').innerHTML=(function(){
+    /* True cumulative build-up: each bar starts where the previous ended and
+       climbs toward the total. The bar shows its segment offset by the running
+       sum; the right side shows the running total reached after adding it. */
+    var running=0;
+    return allWfRows.map(function(r){
+      var sub=wfSubs[r.l]||'';
+      var startPct=Math.max(running/tc*100,0);
+      var segPct=Math.max(r.v/tc*100,0);
+      running+=r.v;
+      var cumPct=Math.min(running/tc*100,100);
+      var opacity=r.dim?'opacity:.55;':'';
+      return '<div class="wf-row" style="'+opacity+'">'+
+        '<div class="wf-lbl-wrap">'+
+          '<div class="wf-lbl" style="color:'+r.c+'">'+r.l+'</div>'+
+          (sub?'<div class="wf-lbl-sub">'+sub+'</div>':'')+
+        '</div>'+
+        '<div class="wf-center">'+
+          '<div class="wf-bar-row">'+
+            '<div class="wf-track">'+
+              /* transparent spacer up to the running start, then the segment */
+              '<div style="display:inline-block;height:100%;width:'+startPct.toFixed(1)+'%"></div>'+
+              '<div class="wf-bar" style="display:inline-block;width:'+segPct.toFixed(1)+'%;background:'+r.c+';vertical-align:top"></div>'+
+            '</div>'+
+            '<span class="wf-bar-label">'+cumPct.toFixed(0)+'%</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="wf-right">'+
+          '<div class="wf-amt">'+fK(r.v)+'</div>'+
+          '<div class="wf-pct-badge" style="background:'+r.c+'22;color:'+r.c+'">\u2211 '+fK(running)+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join('') +
+    /* final total bar */
+    '<div class="wf-row" style="border-top:.5px solid var(--border2);margin-top:4px;padding-top:8px">'+
+      '<div class="wf-lbl-wrap"><div class="wf-lbl" style="color:var(--text);font-weight:700">Total budget</div></div>'+
+      '<div class="wf-center"><div class="wf-bar-row"><div class="wf-track"><div class="wf-bar" style="width:100%;background:linear-gradient(90deg,#4a90d9,#10b981,#3b82f6,#06b6d4,#f59e0b,#64748b)"></div></div><span class="wf-bar-label">100%</span></div></div>'+
+      '<div class="wf-right"><div class="wf-amt" style="font-weight:700">'+fK(tc)+'</div></div>'+
+    '</div>';
+  })();
 
   el('over-amt').textContent=f$(tc-D.target*activeStudentCount());
   el('gauge-fill').style.width=Math.min(cpv/D.target/4*100,100)+'%';
